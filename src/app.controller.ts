@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -11,8 +11,7 @@ export class AppController {
   }
 
   @Get('/testpage')
-  getTestPage(): string {
-    return "This is testpage info"
+  getTestPage() {
   }
 
   @Get('/listpage')
@@ -36,8 +35,8 @@ export class AppController {
   }
 
   @Post('/login')
-  login(): string {
-    return "This is login"
+  login() {
+    
   }
 
   @Post('/logout')
@@ -66,8 +65,8 @@ export class AppController {
   }
 
   @Patch('/userinfo')
-  editUserinfo(): string {
-    return "This is BINGO"
+  editUserinfo() {
+    
   }
 
   @Patch('/pocket')
