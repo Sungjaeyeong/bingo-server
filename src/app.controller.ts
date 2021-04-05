@@ -15,6 +15,11 @@ export class AppController {
     return this.appService.googleLogin(bodyData, res);
   }
 
+  @Post('/kakaologin')
+  kakaoLogin(@Body() bodyData, @Res() res) {
+    return this.appService.kakaoLogin(bodyData, res);
+  }
+
   @Get('/testpage')
   getTestPage() {
   }
