@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AppController } from 'src/app.controller';
-import { AppService } from 'src/app.service';
+import { DonateController } from 'src/controllers/donate.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { donatesProviders } from 'src/providers/donates.providers';
+import { DonateService } from 'src/services/donate.service';
 
 @Module({
   imports: [DatabaseModule],
-  controllers: [AppController],
+  controllers: [DonateController],
   providers: [
-    AppService,
+    DonateService,
     ...donatesProviders,
   ],
 })
