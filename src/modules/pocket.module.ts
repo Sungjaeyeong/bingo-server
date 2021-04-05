@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AppController } from 'src/app.controller';
-import { AppService } from 'src/app.service';
+import { PocketController } from 'src/controllers/pocket.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { pocketsProviders } from 'src/providers/pockets.providers';
+import { PocketService } from 'src/services/pocket.service';
 
 @Module({
   imports: [DatabaseModule],
-  controllers: [AppController],
+  controllers: [PocketController],
   providers: [
-    AppService,
+    PocketService,
     ...pocketsProviders,
   ],
 })
