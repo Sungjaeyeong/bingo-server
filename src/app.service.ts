@@ -24,4 +24,18 @@ export class AppService {
     }
   }
 
+  async kakaoLogin(bodyData, res) {
+    console.log(bodyData.authorizationCode);
+    await axios.post("https://kauth.kakao.com/oauth/token", {
+      client_id: process.env.KAKAO_CLIENT_ID,
+      code: bodyData.authorizationCode,
+      redirect_uri: 'https://localhost:3000',
+      grant_type: 'authorization_code'
+    },)
+    .then(response => {
+      console.log(response.data.access_token);
+      res.status(200).send({ accessToken: response.data.access_token });
+    })
+    .catch(err => console.log(err));
+  }
 }
