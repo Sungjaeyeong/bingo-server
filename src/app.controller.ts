@@ -10,6 +10,11 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Post('/googlelogin')
+  googleLogin(@Body() bodyData, @Res() res) {
+    return this.appService.googleLogin(bodyData, res);
+  }
+
   @Get('/testpage')
   getTestPage() {
   }
