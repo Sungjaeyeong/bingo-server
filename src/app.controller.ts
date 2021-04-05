@@ -36,7 +36,7 @@ export class AppController {
 
   @Post('/login')
   login() {
-    
+    return this.appService.login();
   }
 
   @Post('/logout')
