@@ -19,21 +19,6 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post("/googlelogin")
-  googleLogin(@Body() bodyData, @Res() res) {
-    return this.appService.googleLogin(bodyData, res);
-  }
-
-  @Post("/kakaologin")
-  kakaoLogin(@Body() bodyData, @Res() res) {
-    return this.appService.kakaoLogin(bodyData, res);
-  }
-
-  @Post("/kakaologout")
-  kakaologout(@Body() bodyData, @Res() res) {
-    return this.appService.kakaoLogout(bodyData, res);
-  }
-
   @Get("/testpage")
   getTestPage() {}
 
