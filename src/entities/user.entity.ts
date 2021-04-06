@@ -16,7 +16,7 @@ export class User extends Model<User> {
   level: string;
 
   @Column
-  googleId: number;
+  googleId: string;
 
   @Column
   kakaoId: number;
