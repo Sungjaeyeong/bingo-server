@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, Get, Patch, Post, Req, Res } from '@nestjs/common';
-import { AppService } from './app.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Req,
+  Res,
+} from "@nestjs/common";
+import { AppService } from "./app.service";
 
 @Controller()
 export class AppController {
@@ -10,33 +19,36 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post('/googlelogin')
+  @Post("/googlelogin")
   googleLogin(@Body() bodyData, @Res() res) {
     return this.appService.googleLogin(bodyData, res);
   }
 
-  @Post('/kakaologin')
+  @Post("/kakaologin")
   kakaoLogin(@Body() bodyData, @Res() res) {
     return this.appService.kakaoLogin(bodyData, res);
   }
 
-  @Get('/testpage')
-  getTestPage() {
+  @Post("/kakaologout")
+  kakaologout(@Body() bodyData, @Res() res) {
+    return this.appService.kakaoLogout(bodyData, res);
   }
 
-  @Get('/listpage')
+  @Get("/testpage")
+  getTestPage() {}
+
+  @Get("/listpage")
   getListPage(): string {
-    return "This is listpage info"
+    return "This is listpage info";
   }
 
-  @Get('/contentpage')
+  @Get("/contentpage")
   getContentPage(): string {
-    return "This is contentpage info"
+    return "This is contentpage info";
   }
 
-  @Get('/mypage')
+  @Get("/mypage")
   getMyPage(): string {
-    return "This is mypage info"
+    return "This is mypage info";
   }
-
 }
