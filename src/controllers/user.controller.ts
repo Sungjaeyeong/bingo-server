@@ -5,11 +5,6 @@ import { UserService } from 'src/services/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  home() {
-    return 'Welcome Home';
-  }
-
   @Post("/googlelogin")
   googleLogin(@Body() bodyData, @Res() res) {
     return this.userService.googleLogin(bodyData, res);

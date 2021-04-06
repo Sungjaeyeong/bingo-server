@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios from "axios";
+import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
 import { User } from 'src/entities/user.entity';
 const qs = require("querystring");
 
@@ -9,8 +10,13 @@ export class UserService {
     @Inject('USER_REPOSITORY') private userRepository: typeof User,
   ) {}
 
-  getHello(): string {
-    return 'Hello World!';
+  async insertUser(username: string, profileImage: string, googleId = null, kakaoId = null) {
+    await this.userRepository.create(<User>({
+      username,
+      profileImage,
+      googleId,
+      kakaoId,
+    }))
   }
 
   async googleLogin(bodyData, res) {
@@ -27,7 +33,7 @@ export class UserService {
           this.getGoogleInfo(response.data.access_token);
           res.status(200).send({ accessToken: response.data.access_token });
         })
-        .catch(err => console.log("err"));
+        .catch(err => console.log("googleLogin err"));
     }
   }
 
@@ -39,19 +45,16 @@ export class UserService {
         },
       })
       .then(async (res) => {
-        const userInfoGoogle = res.data;
-        const userInfoDB = await this.userRepository.findOne({
-          where: {  }
+        const userInfoGoogle: GoogleUserDto = res.data;
+        const userInfoDB: User = await this.userRepository.findOne({
+          where: { googleId: userInfoGoogle.sub, }
         })
-        if (userInfoDB) {
-          let { username,  } = userInfoDB;
-          return { username,  }
-        } else {
-          
+  
+        if (!userInfoDB) {
+          this.insertUser(userInfoGoogle.name, userInfoGoogle.picture, userInfoGoogle.sub);
         }
-        console.log(res.data)
       })
-      .catch(err => console.log(err))
+      .catch(err => console.log('getGoogleInfo err'))
   }
 
   async goolgeLogout(bodyData, res) {
@@ -64,7 +67,7 @@ export class UserService {
           },
         })
         .then(res.send("로그아웃 성공!!!!!"))
-        .catch(err => console.log(err));
+        .catch(err => console.log('goolgeLogout err'));
     }
   }
 
@@ -75,28 +78,32 @@ export class UserService {
       redirect_uri: "https://localhost:3000",
       grant_type: "authorization_code",
     });
-
-    console.log(bodyData.authorizationCode);
     await axios
       .post("https://kauth.kakao.com/oauth/token", body)
-
       .then(response => {
         this.getKakaoInfo(response.data.access_token);
         res.status(200).send({ accessToken: response.data.access_token });
       })
-
-      .catch(err => console.log(err));
+      .catch(err => console.log('kakaoLogin err'));
   }
 
   getKakaoInfo = async (token: string) => {
+    console.log(token)
     await axios
     .get("https://kapi.kakao.com/v2/user/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-    .then(res => {
-      console.log("get_data_check:", res.data);
+    .then(async (res) => {
+      const userInfoKakao = res.data;
+      const userInfoDB: User = await this.userRepository.findOne({
+        where: { kakaoId: userInfoKakao.id, }
+      })
+      console.log(userInfoKakao.properties)
+      if (!userInfoDB) {
+        this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id);
+      }
     })
     .catch(err => console.log(err));
   }
@@ -111,7 +118,7 @@ export class UserService {
           },
         })
         .then(res.send("로그아웃 성공!!!!!"))
-        .catch(err => console.log(err));
+        .catch(err => console.log('kakaoLogout err'));
     }
   }
 }
