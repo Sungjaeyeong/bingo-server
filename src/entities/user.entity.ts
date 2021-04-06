@@ -15,6 +15,12 @@ export class User extends Model<User> {
   @Column
   level: string;
 
+  @Column
+  googleId: number;
+
+  @Column
+  kakaoId: number;
+
   @HasMany(() => Donate)
   donates: Donate[]
 
