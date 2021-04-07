@@ -10,12 +10,19 @@ export class UserService {
     @Inject('USER_REPOSITORY') private userRepository: typeof User,
   ) {}
 
-  async insertUser(username: string, profileImage: string, googleId = null, kakaoId = null) {
+  async checkAuth(req, res) {
+    console.log(req.cookies)
+    res.send('ok')
+  }
+
+  async insertUser(username: string, profileImage: string, googleId = null, kakaoId = null, accessToken: string, refreshToken: string) {
     await this.userRepository.create(<User>({
       username,
       profileImage,
       googleId,
       kakaoId,
+      accessToken,
+      refreshToken
     }))
   }
 
@@ -30,18 +37,19 @@ export class UserService {
           grant_type: "authorization_code",
         })
         .then(response => {
-          this.getGoogleInfo(response.data.access_token);
+          this.getGoogleInfo(response.data.access_token, response.data.refresh_token);
+          res.cookie('accessToken', response.data.access_token);
           res.status(200).send({ accessToken: response.data.access_token });
         })
         .catch(err => console.log("googleLogin err"));
     }
   }
 
-  getGoogleInfo = async (token: string) => {
+  getGoogleInfo = async (accessToken: string, refreshToken?: string) => {
     await axios
       .get("https://www.googleapis.com/oauth2/v3/userinfo", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       })
       .then(async (res) => {
@@ -51,7 +59,7 @@ export class UserService {
         })
   
         if (!userInfoDB) {
-          this.insertUser(userInfoGoogle.name, userInfoGoogle.picture, userInfoGoogle.sub);
+          this.insertUser(userInfoGoogle.name, userInfoGoogle.picture, userInfoGoogle.sub, null, accessToken, refreshToken);
         }
       })
       .catch(err => console.log('getGoogleInfo err'))
@@ -102,7 +110,7 @@ export class UserService {
       })
       console.log(userInfoKakao.properties)
       if (!userInfoDB) {
-        this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id);
+        // this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id);
       }
     })
     .catch(err => console.log(err));

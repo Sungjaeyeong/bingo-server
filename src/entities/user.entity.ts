@@ -21,6 +21,12 @@ export class User extends Model<User> {
   @Column
   kakaoId: number;
 
+  @Column
+  accessToken: string;
+
+  @Column
+  refreshToken: string;
+
   @HasMany(() => Donate)
   donates: Donate[]
 
