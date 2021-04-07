@@ -6,7 +6,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get("/checkauth")
-  checkAuth(@Req() req ,@Res() res) {
+  checkAuth(@Req() req, @Res() res) {
     return this.userService.checkAuth(req, res);
   }
 

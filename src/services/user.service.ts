@@ -38,7 +38,13 @@ export class UserService {
         })
         .then(response => {
           this.getGoogleInfo(response.data.access_token, response.data.refresh_token);
-          res.cookie('accessToken', response.data.access_token);
+          res.cookie('accessToken', response.data.access_token, {
+            domain: 'ibingo.link',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+          });
           res.status(200).send({ accessToken: response.data.access_token });
         })
         .catch(err => console.log("googleLogin err"));
