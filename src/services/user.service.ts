@@ -29,6 +29,27 @@ export class UserService {
         //     profileImage: (await userInfoDB).profileImage 
         //   }
         // })
+        const userInfoDB = this.getUserInfo(accessToken);
+        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+        .then(async (newAccessToken) => {
+          response.cookie('k_accessToken', newAccessToken, {
+            domain: 'localhost',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+          });
+          response.status(200).send({ 
+            data: { 
+              id: (await userInfoDB).id, 
+              username: (await userInfoDB).username, 
+              profileImage: (await userInfoDB).profileImage 
+            }
+          })
+        })
+        .catch(async () => {
+          response.send('RefreshToken is expired');
+        })
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
@@ -250,20 +271,6 @@ export class UserService {
       .catch(err => console.log('getGoogleInfo err'))
   }
 
-  async goolgeLogout(bodyData, res) {
-    console.log("logout_token:", bodyData.access_token);
-    if (bodyData.access_token) {
-      await axios
-        .post("https://accounts.google.com/logout", {
-          headers: {
-            Authorization: `Bearer ${bodyData.access_token}`,
-          },
-        })
-        .then(res.send("로그아웃 성공!!!!!"))
-        .catch(err => console.log('goolgeLogout err'));
-    }
-  }
-
   async kakaoLogin(bodyData, res) {
     await axios
       .post("https://kauth.kakao.com/oauth/token",{} ,{
@@ -312,17 +319,41 @@ export class UserService {
     .catch(err => console.log('getKakaoInfo err'));
   }
 
-  async kakaoLogout(bodyData, res) {
-    console.log("logout_token:", bodyData.access_token);
-    if (bodyData.access_token) {
+  async logout(req, res) {
+    console.log('a')
+    if (req.cookies.k_accessToken || req.cookies.accessToken) {
+      res.clearCookie('k_accessToken', {
+        domain: 'localhost',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      })
+      res.clearCookie('accessToken', {
+        domain: 'localhost',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      })
+      // this.kakaoLogout(req.cookies.k_accessToken);
+      res.send('logout')
+    } else {
+      res.status(400).send('Not logged in')
+    }
+  }
+
+  async kakaoLogout(k_accessToken: string) {
+    if (k_accessToken) {
       await axios
         .post("https://kapi.kakao.com/v1/user/logout", {
           headers: {
-            Authorization: `Bearer ${bodyData.access_token}`,
+            Authorization: `Bearer ${k_accessToken}`,
           },
         })
-        .then(res.send("로그아웃 성공!!!!!"))
         .catch(err => console.log('kakaoLogout err'));
     }
   }
 }
+
+

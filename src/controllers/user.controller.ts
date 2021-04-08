@@ -20,19 +20,14 @@ export class UserController {
     return this.userService.googleLogin(bodyData, res);
   }
 
-  @Post("/googlelogout")
-  googleLogout(@Body() bodyData, @Res() res) {
-    return this.userService.kakaoLogout(bodyData, res);
-  }
-
   @Post("/kakaologin")
   kakaoLogin(@Body() bodyData, @Res() res) {
     return this.userService.kakaoLogin(bodyData, res);
   }
 
-  @Post("/kakaologout")
-  kakaologout(@Body() bodyData, @Res() res) {
-    return this.userService.kakaoLogout(bodyData, res);
+  @Post("/logout")
+  logout(@Req() req, @Res() res) {
+    return this.userService.logout(req, res);
   }
 
   @Patch('/userinfo')
