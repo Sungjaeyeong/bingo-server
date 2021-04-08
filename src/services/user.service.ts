@@ -33,7 +33,7 @@ export class UserService {
         this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
         .then(async (newAccessToken) => {
           response.cookie('k_accessToken', newAccessToken, {
-            domain: 'localhost',
+            domain: 'ibingo.link',
             path: '/',
             httpOnly: true,
             secure: true,
@@ -56,7 +56,7 @@ export class UserService {
         this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
         .then(async (newAccessToken) => {
           response.cookie('k_accessToken', newAccessToken, {
-            domain: 'localhost',
+            domain: 'ibingo.link',
             path: '/',
             httpOnly: true,
             secure: true,
@@ -134,7 +134,7 @@ export class UserService {
         this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
         .then(async (newAccessToken) => {
           response.cookie('accessToken', newAccessToken, {
-            domain: 'localhost',
+            domain: 'ibingo.link',
             path: '/',
             httpOnly: true,
             secure: true,
@@ -226,13 +226,13 @@ export class UserService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000",
+          redirect_uri: "https://ibingo.link",
           grant_type: "authorization_code",
         })
         .then(response => {
           this.getGoogleInfo(response.data.access_token, response.data.refresh_token);
           res.cookie('accessToken', response.data.access_token, {
-            domain: 'localhost',
+            domain: 'ibingo.link',
             path: '/',
             httpOnly: true,
             secure: true,
@@ -277,14 +277,14 @@ export class UserService {
         params: {
           client_id: process.env.KAKAO_CLIENT_ID,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000",
+          redirect_uri: "https://ibingo.link",
           grant_type: "authorization_code",
         },
       })
       .then(response => {
         this.getKakaoInfo(response.data.access_token, response.data.refresh_token);
         res.cookie('k_accessToken', response.data.access_token, {
-          domain: 'localhost',
+          domain: 'ibingo.link',
           path: '/',
           httpOnly: true,
           secure: true,
@@ -323,14 +323,14 @@ export class UserService {
     console.log('a')
     if (req.cookies.k_accessToken || req.cookies.accessToken) {
       res.clearCookie('k_accessToken', {
-        domain: 'localhost',
+        domain: 'ibingo.link',
         path: '/',
         httpOnly: true,
         secure: true,
         sameSite: 'none'
       })
       res.clearCookie('accessToken', {
-        domain: 'localhost',
+        domain: 'ibingo.link',
         path: '/',
         httpOnly: true,
         secure: true,

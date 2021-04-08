@@ -3,9 +3,9 @@ import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.enableCors({
-    origin: ["https://localhost:3000", "http://ibingo.link.s3-website.ap-northeast-2.amazonaws.com", "https://bingo.link"],
+    origin: ["https://localhost:3000", "http://ibingo.link.s3-website.ap-northeast-2.amazonaws.com", "https://ibingo.link"],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   }
