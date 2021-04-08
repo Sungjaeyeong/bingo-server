@@ -12,27 +12,46 @@ export class UserService {
   // 카카오 access_token 검사
   async checkKakaoAuth(req, response) {
     if (req.cookies.k_accessToken) {
-      const accessToken = req.cookies.k_accessToken;
+      const accessToken: string = req.cookies.k_accessToken;
       await axios
-      .get("https://kapi.kakao.com//v1/user/access_token_info", {
+      .get("https://kapi.kakao.com/v1/user/access_token_info", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
       .then(async (res) => {
-        const userInfoDB = this.getUserInfo(accessToken);
-        response.status(200).send({ 
-          data: { 
-            id: (await userInfoDB).id, 
-            username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage 
-          }
-        })
-        console.log(res.data.expires_in)
+        // console.log(res.data)
+        // const userInfoDB = this.getUserInfo(accessToken);
+        // response.status(200).send({ 
+        //   data: { 
+        //     id: (await userInfoDB).id, 
+        //     username: (await userInfoDB).username, 
+        //     profileImage: (await userInfoDB).profileImage 
+        //   }
+        // })
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id);
+        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+        .then(async (newAccessToken) => {
+          response.cookie('k_accessToken', newAccessToken, {
+            domain: 'localhost',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+          });
+          response.status(200).send({ 
+            data: { 
+              id: (await userInfoDB).id, 
+              username: (await userInfoDB).username, 
+              profileImage: (await userInfoDB).profileImage 
+            }
+          })
+        })
+        .catch(async () => {
+          response.send('RefreshToken is expired');
+        })
       })
     } else {
       response.status(200).send({ 
@@ -47,11 +66,14 @@ export class UserService {
 
   // 카카오 access_token 받아오기
   async getKakaoAccessToken(refresh_token: string, userId: number) {
+    let accessToken: string;
     await axios
-    .post("https://kauth.kakao.com/oauth/token", {
-      client_id: process.env.KAKAO_CLIENT_ID,
-      refresh_token,
-      grant_type: "refresh_token",
+    .post("https://kauth.kakao.com/oauth/token", {}, {
+      params: {
+        client_id: process.env.KAKAO_CLIENT_ID,
+        refresh_token,
+        grant_type: "refresh_token",
+      }
     })
     .then(async (res) => {
       if (res.data.refresh_token) {
@@ -59,8 +81,10 @@ export class UserService {
       } else {
         this.updateAccessToken(res.data.access_token, userId);
       }
+      accessToken = res.data.access_token;
     })
-    .catch(err => console.log('getKakaoAccessToken err'))
+    .catch(err => console.log(err))
+    return accessToken;
   }
 
   // 구글 access_token 검사
@@ -282,7 +306,7 @@ export class UserService {
       if (!userInfoDB) {
         this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id, accessToken, refreshToken);
       } else {
-        this.updateRefreshToken(accessToken, refreshToken, userInfoKakao.id)
+        this.updateRefreshToken(accessToken, refreshToken, userInfoDB.id)
       }
     })
     .catch(err => console.log('getKakaoInfo err'));
