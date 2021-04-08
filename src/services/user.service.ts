@@ -119,15 +119,36 @@ export class UserService {
         }
       },)
       .then(async (res) => {
+        // const userInfoDB = this.getUserInfo(accessToken);
+        // response.status(200).send({ 
+        //   data: { 
+        //     id: (await userInfoDB).id, 
+        //     username: (await userInfoDB).username, 
+        //     profileImage: (await userInfoDB).profileImage 
+        //   }
+        // })
+        // console.log(res.data)
         const userInfoDB = this.getUserInfo(accessToken);
-        response.status(200).send({ 
-          data: { 
-            id: (await userInfoDB).id, 
-            username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage 
-          }
+        this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+        .then(async (newAccessToken) => {
+          response.cookie('accessToken', newAccessToken, {
+            domain: 'ibingo.link',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+          });
+          response.status(200).send({ 
+            data: { 
+              id: (await userInfoDB).id, 
+              username: (await userInfoDB).username, 
+              profileImage: (await userInfoDB).profileImage 
+            }
+          })
         })
-        console.log(res.data)
+        .catch(async () => {
+          response.send('RefreshToken is expired');
+        })
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
