@@ -5,9 +5,14 @@ import { UserService } from 'src/services/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get("/checkauth")
-  checkAuth(@Req() req, @Res() res) {
-    return this.userService.checkAuth(req, res);
+  @Get("/checkgoogleauth")
+  checkGoogleAuth(@Req() req, @Res() res) {
+    return this.userService.checkGoogleAuth(req, res);
+  }
+
+  @Get("/checkkakaoauth")
+  checkKakaoAuth(@Req() req, @Res() res) {
+    return this.userService.checkKakaoAuth(req, res);
   }
 
   @Post("/googlelogin")
