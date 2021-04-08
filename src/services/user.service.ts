@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import axios from "axios";
 import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
 import { User } from 'src/entities/user.entity';
-const qs = require("querystring");
 
 @Injectable()
 export class UserService {
@@ -10,30 +9,104 @@ export class UserService {
     @Inject('USER_REPOSITORY') private userRepository: typeof User,
   ) {}
 
+  // 카카오 access_token 검사
+  async checkKakaoAuth(req, response) {
+    if (req.cookies.k_accessToken) {
+      const accessToken = req.cookies.k_accessToken;
+      await axios
+      .get("https://kapi.kakao.com//v1/user/access_token_info", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then(async (res) => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        response.status(200).send({ 
+          data: { 
+            id: (await userInfoDB).id, 
+            username: (await userInfoDB).username, 
+            profileImage: (await userInfoDB).profileImage 
+          }
+        })
+        console.log(res.data.expires_in)
+      })
+      .catch(async () => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id);
+      })
+    } else {
+      response.status(200).send({ 
+        data: { 
+          id: null, 
+          username: null,
+          profileImage: null
+        }
+      })
+    }
+  }
+
+  // 카카오 access_token 받아오기
+  async getKakaoAccessToken(refresh_token: string, userId: number) {
+    await axios
+    .post("https://kauth.kakao.com/oauth/token", {
+      client_id: process.env.KAKAO_CLIENT_ID,
+      refresh_token,
+      grant_type: "refresh_token",
+    })
+    .then(async (res) => {
+      if (res.data.refresh_token) {
+        this.updateRefreshToken(res.data.access_token, res.data.refresh_token, userId)
+      } else {
+        this.updateAccessToken(res.data.access_token, userId);
+      }
+    })
+    .catch(err => console.log('getKakaoAccessToken err'))
+  }
+
   // 구글 access_token 검사
-  async checkAuth(req, response) {
+  async checkGoogleAuth(req, response) {
     if (req.cookies.accessToken) {
       const accessToken = req.cookies.accessToken;
       await axios
-        .get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`)
-        .then(async (res) => {
-          const userInfoDB = this.getUserInfo(accessToken);
-
-          if (res.data.expires_in > 0) {
-            response.status(200).send({ 
-              data: { 
-                id: (await userInfoDB).id, 
-                username: (await userInfoDB).username, 
-                profileImage: (await userInfoDB).profileImage 
-              }
-            })
-          } else {
-            const isExpiredRefreshToken = this.getAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id);
-            if(isExpiredRefreshToken) response.send('RefreshToken is expired');
+      .get(`https://www.googleapis.com/oauth2/v1/tokeninfo`, {
+        params: {
+          access_token: accessToken
+        }
+      },)
+      .then(async (res) => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        response.status(200).send({ 
+          data: { 
+            id: (await userInfoDB).id, 
+            username: (await userInfoDB).username, 
+            profileImage: (await userInfoDB).profileImage 
           }
         })
-        .catch(err => console.log('checkAuth err'))
-
+        console.log(res.data)
+      })
+      .catch(async () => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+        .then(async (newAccessToken) => {
+          response.cookie('accessToken', newAccessToken, {
+            domain: 'localhost',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+          });
+          response.status(200).send({ 
+            data: { 
+              id: (await userInfoDB).id, 
+              username: (await userInfoDB).username, 
+              profileImage: (await userInfoDB).profileImage 
+            }
+          })
+        })
+        .catch(async () => {
+          response.send('RefreshToken is expired');
+        })
+      })
     } else {
       response.status(200).send({ 
         data: { 
@@ -54,24 +127,26 @@ export class UserService {
   }
 
   // 구글 access_token 받아오기
-  async getAccessToken(refresh_token: string, userId: number) {
+  async getGoogleAccessToken(refresh_token: string, userId: number) {
+    let accessToken: string;
     await axios
-      .post("https://oauth2.googleapis.com/token", {
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token,
-        grant_type: "refresh_token",
-      })
-      .then(async (res) => {
-        this.updateAccessToken(res.data.access_token, userId);
-        return false;
-      })
-      .catch(err => true)
+    .post("https://oauth2.googleapis.com/token", {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      refresh_token,
+      grant_type: "refresh_token",
+    })
+    .then(async (res) => {
+      this.updateAccessToken(res.data.access_token, userId);
+      accessToken = res.data.access_token;
+    })
+    .catch(err => console.log('getGoogleAccessToken err'))
+    return accessToken;
   }
 
   // DB에서 refreshToken 갱신
-  async updateRefreshToken(refreshToken: string, id: number) {
-    await this.userRepository.update({ refreshToken }, {
+  async updateRefreshToken(accessToken: string, refreshToken: string, id: number) {
+    await this.userRepository.update({ accessToken, refreshToken }, {
       where: {
         id
       }
@@ -142,7 +217,9 @@ export class UserService {
           this.insertUser(userInfoGoogle.name, userInfoGoogle.picture, userInfoGoogle.sub, null, accessToken, refreshToken);
         } else {
           if (refreshToken) {
-            this.updateRefreshToken(refreshToken, userInfoDB.id)
+            this.updateRefreshToken(accessToken, refreshToken, userInfoDB.id);
+          } else {
+            this.updateAccessToken(accessToken, userInfoDB.id);
           }
         }
       })
@@ -164,27 +241,36 @@ export class UserService {
   }
 
   async kakaoLogin(bodyData, res) {
-    const body = qs.stringify({
-      client_id: "1f6fa43748f197dd179b4768a677578d",
-      code: bodyData.authorizationCode,
-      redirect_uri: "https://localhost:3000",
-      grant_type: "authorization_code",
-    });
     await axios
-      .post("https://kauth.kakao.com/oauth/token", body)
+      .post("https://kauth.kakao.com/oauth/token",{} ,{
+        params: {
+          client_id: process.env.KAKAO_CLIENT_ID,
+          code: bodyData.authorizationCode,
+          redirect_uri: "https://localhost:3000",
+          grant_type: "authorization_code",
+        },
+      })
       .then(response => {
-        this.getKakaoInfo(response.data.access_token);
+        this.getKakaoInfo(response.data.access_token, response.data.refresh_token);
+        res.cookie('k_accessToken', response.data.access_token, {
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none'
+        });
         res.status(200).send({ accessToken: response.data.access_token });
       })
       .catch(err => console.log('kakaoLogin err'));
   }
 
-  getKakaoInfo = async (token: string) => {
-    console.log(token)
+  // 카카오에서 정보 받아오기
+  getKakaoInfo = async (accessToken: string, refreshToken: string) => {
+    console.log(accessToken)
     await axios
     .get("https://kapi.kakao.com/v2/user/me", {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     })
     .then(async (res) => {
@@ -194,10 +280,12 @@ export class UserService {
       })
       console.log(userInfoKakao.properties)
       if (!userInfoDB) {
-        // this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id);
+        this.insertUser(userInfoKakao.properties.nickname, userInfoKakao.properties.profile_image, null, userInfoKakao.id, accessToken, refreshToken);
+      } else {
+        this.updateRefreshToken(accessToken, refreshToken, userInfoKakao.id)
       }
     })
-    .catch(err => console.log(err));
+    .catch(err => console.log('getKakaoInfo err'));
   }
 
   async kakaoLogout(bodyData, res) {
