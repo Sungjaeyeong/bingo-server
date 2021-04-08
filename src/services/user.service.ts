@@ -337,7 +337,7 @@ export class UserService {
         this.updateRefreshToken(accessToken, refreshToken, userInfoDB.id)
       }
     })
-    .catch(err => console.log('getKakaoInfo err'));
+    .catch(err => console.log(err));
   }
 
   async logout(req, res) {
