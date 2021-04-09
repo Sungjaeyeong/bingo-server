@@ -194,16 +194,24 @@ export class UserService {
 
   // DB에서 refreshToken 갱신
   async updateRefreshToken(accessToken: string, refreshToken: string, id: number) {
-    await this.userRepository.update({ accessToken, refreshToken }, {
-      id,
-    });
+    const userInfoDB = await this.userRepository.findOne({ id })
+    userInfoDB.accessToken = accessToken;
+    userInfoDB.refreshToken = refreshToken;
+    await this.userRepository.save(userInfoDB);
+
+    // await this.userRepository.update({ accessToken, refreshToken }, {
+    //   id,
+    // });
   }
 
   // DB에서 accessToken 갱신
   async updateAccessToken(accessToken: string, id: number) {
-    await this.userRepository.update({ accessToken }, {
-      id,
-    });
+    const userInfoDB = await this.userRepository.findOne({ id })
+    userInfoDB.accessToken = accessToken;
+    await this.userRepository.save(userInfoDB);
+    // await this.userRepository.update({ accessToken }, {
+    //   id,
+    // });
   }
 
   // DB에 유저정보 저장

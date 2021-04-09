@@ -14,19 +14,29 @@ export class User {
   @Column()
   profileImage: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   level: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   googleId: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   kakaoId: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   accessToken: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   refreshToken: string;
 
   @OneToMany(type => Pocket, pocket => pocket.userId)
