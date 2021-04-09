@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PocketController } from 'src/controllers/pocket.controller';
-import { DatabaseModule } from 'src/database/database.module';
-import { pocketsProviders } from 'src/providers/pockets.providers';
+import { Pocket } from 'src/entities/pocket.entity';
 import { PocketService } from 'src/services/pocket.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [TypeOrmModule.forFeature([Pocket])],
   controllers: [PocketController],
   providers: [
     PocketService,
-    ...pocketsProviders,
   ],
 })
 export class PocketsModule {}

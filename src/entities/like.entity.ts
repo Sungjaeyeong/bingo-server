@@ -1,22 +1,21 @@
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from './user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Ngo } from './ngo.entity';
+import { User } from './user.entity';
 
-@Table
-export class Like extends Model<Like> {
-  
-  @ForeignKey(() => User)
-  @Column
+@Entity()
+export class Like {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   userId: number;
 
-  @ForeignKey(() => Ngo)
-  @Column
+  @Column()
   ngoId: number;
 
-  @BelongsTo(() => User)
-  user: User
+  @ManyToOne(type => User, user => user.likes)
+  user: User;
 
-  @BelongsTo(() => Ngo)
-  ngo: Ngo
-
+  @ManyToOne(type => Ngo, ngo => ngo.likes)
+  ngo: Ngo;
 }
