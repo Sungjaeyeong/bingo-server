@@ -1,28 +1,27 @@
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from './user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Ngo } from './ngo.entity';
+import { User } from './user.entity';
 
-@Table
-export class Pocket extends Model<Pocket> {
-  
-  @Column
+@Entity()
+export class Pocket {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   type: string;
 
-  @Column
+  @Column()
   money: string;
 
-  @ForeignKey(() => User)
-  @Column
+  @Column()
   userId: number;
 
-  @ForeignKey(() => Ngo)
-  @Column
+  @Column()
   ngoId: number;
 
-  @BelongsTo(() => User)
-  user: User
+  @ManyToOne(type => User, user => user.pockets)
+  user: User;
 
-  @BelongsTo(() => Ngo)
-  ngo: Ngo
-
+  @ManyToOne(type => Ngo, ngo => ngo.pockets)
+  ngo: Ngo;
 }

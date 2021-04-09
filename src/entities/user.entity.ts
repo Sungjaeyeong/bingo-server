@@ -1,39 +1,41 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Donate } from './donate.entity';
 import { Like } from './like.entity';
 import { Pocket } from './pocket.entity';
 
-@Table
-export class User extends Model<User> {
-  
-  @Column
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   username: string;
 
-  @Column
+  @Column()
   profileImage: string;
 
-  @Column
+  @Column()
   level: string;
 
-  @Column
+  @Column()
   googleId: string;
 
-  @Column
+  @Column()
   kakaoId: number;
 
-  @Column
+  @Column()
   accessToken: string;
 
-  @Column
+  @Column()
   refreshToken: string;
 
-  @HasMany(() => Donate)
-  donates: Donate[]
+  @OneToMany(type => Pocket, pocket => pocket.userId)
+  pockets: Pocket[];
 
-  @HasMany(() => Like)
-  like: Like[]
+  @OneToMany(type => Donate, donate => donate.userId)
+  donates: Donate[];
 
-  @HasMany(() => Pocket)
-  pocket: Pocket[]
+  @OneToMany(type => Like, like => like.userId)
+  likes: Like[];
 
 }

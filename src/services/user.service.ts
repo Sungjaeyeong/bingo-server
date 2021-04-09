@@ -1,12 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import axios from "axios";
 import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
 import { User } from 'src/entities/user.entity';
+import { getConnection, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('USER_REPOSITORY') private userRepository: typeof User,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   // 카카오 access_token 검사
@@ -166,7 +169,7 @@ export class UserService {
   // DB에서 유저정보 가져오기
   async getUserInfo(accessToken: string) {
     const userInfoDB: User = await this.userRepository.findOne({
-      where: { accessToken, }
+      accessToken,
     })
     return userInfoDB;
   }
@@ -192,24 +195,20 @@ export class UserService {
   // DB에서 refreshToken 갱신
   async updateRefreshToken(accessToken: string, refreshToken: string, id: number) {
     await this.userRepository.update({ accessToken, refreshToken }, {
-      where: {
-        id
-      }
+      id,
     });
   }
 
   // DB에서 accessToken 갱신
   async updateAccessToken(accessToken: string, id: number) {
     await this.userRepository.update({ accessToken }, {
-      where: {
-        id
-      }
+      id,
     });
   }
 
   // DB에 유저정보 저장
   async insertUser(username: string, profileImage: string, googleId = null, kakaoId = null, accessToken: string, refreshToken: string) {
-    await this.userRepository.create(<User>({
+    await this.userRepository.save(({
       username,
       profileImage,
       googleId,
@@ -255,7 +254,7 @@ export class UserService {
       .then(async (res) => {
         const userInfoGoogle: GoogleUserDto = res.data;
         const userInfoDB: User = await this.userRepository.findOne({
-          where: { googleId: userInfoGoogle.sub, }
+          googleId: userInfoGoogle.sub,
         })
   
         if (!userInfoDB) {
@@ -307,7 +306,7 @@ export class UserService {
     .then(async (res) => {
       const userInfoKakao = res.data;
       const userInfoDB: User = await this.userRepository.findOne({
-        where: { kakaoId: userInfoKakao.id, }
+        kakaoId: userInfoKakao.id,
       })
       console.log(userInfoKakao.properties)
       if (!userInfoDB) {

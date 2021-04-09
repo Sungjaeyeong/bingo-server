@@ -1,42 +1,45 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Donate } from './donate.entity';
 import { Like } from './like.entity';
 import { NgoCategory } from './ngocategory.entity';
 import { Pocket } from './pocket.entity';
 
-@Table
-export class Ngo extends Model<Ngo> {
-  
-  @Column
+@Entity()
+export class Ngo {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   name: string;
 
-  @Column
+  @Column()
   link: string;
 
-  @Column
+  @Column()
   logo: string;
 
-  @Column
+  @Column()
   video: string;
 
-  @Column
+  @Column()
   coverImage: string;
 
-  @Column
+  @Column()
   description: string;
 
-  @Column
+  @Column()
   since: string;
 
-  @HasMany(() => NgoCategory)
-  ngocategory: NgoCategory[];
+  @OneToMany(type => Pocket, pocket => pocket.ngoId)
+  pockets: Pocket[];
 
-  @HasMany(() => Pocket)
-  pocket: Pocket[];
+  @OneToMany(type => Donate, donate => donate.ngoId)
+  donates: Donate[];
 
-  @HasMany(() => Donate)
-  donate: Donate[];
+  @OneToMany(type => Like, like => like.ngoId)
+  likes: Like[];
 
-  @HasMany(() => Like)
-  like: Like[];
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngoId)
+  ngocategorys: NgoCategory[];
+
 }

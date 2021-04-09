@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
-import { DatabaseModule } from 'src/database/database.module';
-import { ngosProviders } from 'src/providers/ngos.providers';
+import { Ngo } from 'src/entities/ngo.entity';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [TypeOrmModule.forFeature([Ngo])],
   controllers: [AppController],
   providers: [
     AppService,
-    ...ngosProviders,
   ],
 })
 export class NgosModule {}

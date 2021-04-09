@@ -1,12 +1,14 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { NgoCategory } from './ngocategory.entity';
 
-@Table
-export class Category extends Model<Category> {
-  
-  @Column
+@Entity()
+export class Category {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   name: string;
 
-  @HasMany(() => NgoCategory)
-  ngocategory: NgoCategory[];
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.categoryId)
+  ngocategorys: NgoCategory[];
 }

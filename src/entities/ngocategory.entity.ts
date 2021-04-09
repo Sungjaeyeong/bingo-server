@@ -1,21 +1,21 @@
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Category } from './category.entity';
 import { Ngo } from './ngo.entity';
 
-@Table
-export class NgoCategory extends Model<NgoCategory> {
+@Entity()
+export class NgoCategory {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @ForeignKey(() => Ngo)
-  @Column
+  @Column()
   ngoId: number;
 
-  @ForeignKey(() => Category)
-  @Column
+  @Column()
   categoryId: number;
 
-  @BelongsTo(() => Ngo)
-  ngo: Ngo;
-
-  @BelongsTo(() => Category)
+  @ManyToOne(type => Category, category => category.ngocategorys)
   category: Category;
+
+  @ManyToOne(type => Ngo, ngo => ngo.ngocategorys)
+  ngo: Ngo;
 }
