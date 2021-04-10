@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Req,
-  Res,
-} from "@nestjs/common";
+import { Controller, Get, Req } from '@nestjs/common';
 import { AppService } from "./app.service";
 
 @Controller()
@@ -20,20 +11,22 @@ export class AppController {
   }
 
   @Get("/testpage")
-  getTestPage() {}
+  getTestPage(@Req() req): boolean {
+    return this.appService.getTestPage(req);
+  }
 
   @Get("/listpage")
-  getListPage(): string {
-    return "This is listpage info";
+  getListPage() {
+    return this.appService.getListPage();
   }
 
   @Get("/contentpage")
-  getContentPage(): string {
-    return "This is contentpage info";
+  getContentPage() {
+    return this.appService.getContentPage();
   }
 
   @Get("/mypage")
-  getMyPage(): string {
-    return "This is mypage info";
+  getMyPage() {
+    return this.appService.getMyPage();
   }
 }

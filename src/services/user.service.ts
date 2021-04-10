@@ -23,35 +23,13 @@ export class UserService {
         },
       })
       .then(async (res) => {
-        // console.log(res.data)
-        // const userInfoDB = this.getUserInfo(accessToken);
-        // response.status(200).send({ 
-        //   data: { 
-        //     id: (await userInfoDB).id, 
-        //     username: (await userInfoDB).username, 
-        //     profileImage: (await userInfoDB).profileImage 
-        //   }
-        // })
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('k_accessToken', newAccessToken, {
-            domain: 'localhost',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
-          response.status(200).send({ 
-            data: { 
-              id: (await userInfoDB).id, 
-              username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
-            }
-          })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
+        response.status(200).send({ 
+          data: { 
+            id: (await userInfoDB).id, 
+            username: (await userInfoDB).username, 
+            profileImage: (await userInfoDB).profileImage 
+          }
         })
       })
       .catch(async () => {
