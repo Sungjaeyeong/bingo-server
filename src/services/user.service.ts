@@ -198,10 +198,6 @@ export class UserService {
     userInfoDB.accessToken = accessToken;
     userInfoDB.refreshToken = refreshToken;
     await this.userRepository.save(userInfoDB);
-
-    // await this.userRepository.update({ accessToken, refreshToken }, {
-    //   id,
-    // });
   }
 
   // DB에서 accessToken 갱신
@@ -209,9 +205,6 @@ export class UserService {
     const userInfoDB = await this.userRepository.findOne({ id })
     userInfoDB.accessToken = accessToken;
     await this.userRepository.save(userInfoDB);
-    // await this.userRepository.update({ accessToken }, {
-    //   id,
-    // });
   }
 
   // DB에 유저정보 저장
