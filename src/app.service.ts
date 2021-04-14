@@ -81,31 +81,6 @@ export class AppService {
         }
       });
     }
-    
-    // let maxIdx = 0;
-    // let max = 0;
-    // let countArray = [];
-    // let resultList = [];
-    // for (const key in ngocategoryIds) {
-    //   let count = 0;
-    //   let value = ngocategoryIds[key];
-    //   for (let i=0; i<value.length; i++) {
-    //     if (options.includes(String(value[i]))) count++;
-    //   }
-    //   countArray.push(count);
-    //   if (count > max) {
-    //     max = count;
-    //     maxIdx = Number(key);
-    //   }
-    // }
-    // for (let i=0; i<countArray.length; i++) {
-    //   if (countArray[i] === max) resultList.push(i);
-    // }
-    // console.log(resultList)
-    // const resultIdx = Math.floor(Math.random() * resultList.length);
-
-    // console.log(resultIdx)
-    // return ngoInfoDB[resultList[resultIdx]];
   }
 
   async getListPage(res) {
