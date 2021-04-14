@@ -2,9 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CategorysModule } from './modules/category.module';
-import { NgosModule } from './modules/ngo.module';
-import { NgoCategorysModule } from './modules/ngocategory.module';
 import { UsersModule } from './modules/user.module';
 import { DonatesModule } from './modules/donate.module';
 import { LikesModule } from './modules/like.module';
@@ -19,7 +16,9 @@ import { Donate } from './entities/donate.entity';
 import { Category } from './entities/category.entity';
 
 @Module({
-  imports: [UsersModule, DonatesModule, LikesModule, PocketsModule, NgosModule, CategorysModule, NgoCategorysModule,   
+  imports: [
+    TypeOrmModule.forFeature([NgoCategory, Ngo, Category, User]),
+    UsersModule, DonatesModule, LikesModule, PocketsModule,  
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -31,7 +30,7 @@ import { Category } from './entities/category.entity';
       entities: [User, Category, Donate, Like, Ngo, NgoCategory, Pocket],
       synchronize: true,
     }),
-    ],
+  ],
     controllers: [AppController],
     providers: [AppService],
   })

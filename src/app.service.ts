@@ -1,13 +1,25 @@
 import { Injectable } from "@nestjs/common";
+import { InjectRepository } from '@nestjs/typeorm';
+import axios from 'axios';
+import { or } from 'sequelize';
+import { In, Repository } from 'typeorm';
+import { Ngo } from './entities/ngo.entity';
+import { NgoCategory } from './entities/ngocategory.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class AppService {
+  constructor(
+    @InjectRepository(Ngo) private ngoRepository: Repository<Ngo>,
+    @InjectRepository(NgoCategory) private ngocategoryRepository: Repository<NgoCategory>,
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
 
   getHello(): string {
     return "Hello World!";
   }
 
-  getTestPage(req) {
+  getTestCookie(req) {
     if (req.cookies.test) {
       return true;
     } else {
@@ -15,15 +27,121 @@ export class AppService {
     }
   }
 
-  getListPage() {
+  async getTestPage(options) {
+    options = JSON.parse(options)
+    const ngocategoryInfoDB = await this.ngocategoryRepository.find({
+      where: {
+        categoryId: In(options.selectedOptions)
+      }
+    });
+    const ngoIndexs = ngocategoryInfoDB.map(el => el.ngoId);
+    const ngoDB = await this.ngoRepository.find({
+      where: {
+        id: In(ngoIndexs)
+      },
+      relations: ["ngocategorys"]
+    });
+
+    let ngocategoryIds = [];
+    for (let ngoIdx=0; ngoIdx<ngoDB.length; ngoIdx++) {
+      let categoryIds = [];
+      for (let i=0; i<ngoDB[ngoIdx].ngocategorys.length; i++) {
+        categoryIds.push(ngoDB[ngoIdx].ngocategorys[i].categoryId)
+      }
+      ngocategoryIds.push([ngoDB[ngoIdx].id, categoryIds]);
+    }
+
+    let max = 0;
+    let countArray = [];
+    for (let el of ngocategoryIds) {
+      let count = 0;
+      for(let i=0; i<el[1].length; i++) {
+        if(options.postOptions.includes(el[1][i])) count++;
+      }
+      countArray.push([el[0], count]);
+      if (count > max) max = count;
+    }
+    const resultList = countArray.filter(el => el[1] === max);
+    const idOfresultList = resultList.map(el => el[0]);
+    const resultIdx = Math.floor(Math.random() * resultList.length);
+    const ngoId = resultList[resultIdx][0];
+    if (options.postOrder) {
+      return await this.ngoRepository.findOne({
+        where: {
+          id: In(idOfresultList)
+        },
+        order: {
+          since: 'DESC'
+        }
+      });
+    } else {
+      return await this.ngoRepository.findOne({
+        where: {
+          id: ngoId
+        }
+      });
+    }
+  }
+
+  async getListPage(res) {
+    const ngoInfoDB = await this.ngoRepository.find({
+      relations: ["ngocategorys", "ngocategorys.category"]
+    });
+    res.send({ data: ngoInfoDB });
+  }
+
+  async getContentPage(ngoId, res) {
+    const ngoInfoDB = await this.ngoRepository.findOne({
+      where: { id: ngoId },
+      relations: ["ngocategorys", "ngocategorys.category"]
+    });
+    if (!ngoInfoDB) {
+      res.status(404).send('Not Found');
+    } else {
+      const newsList = await this.getNews(ngoInfoDB.name);
+      res.send({ data: ngoInfoDB, newsList, });
+    }
     
   }
 
-  getContentPage() {
-    
+  async getNews(ngoName) {
+    let sortNews = [];
+    await axios
+      .get(`https://openapi.naver.com/v1/search/news.json`,{
+        params: {
+          query: ngoName,
+          display: 100,
+        },
+        headers: {
+          'X-Naver-Client-Id': process.env.NAVER_CLIENT_ID,
+          'X-Naver-Client-Secret': process.env.NAVER_CLIENT_SECRET,
+        }
+      })
+      .then(res => {
+        const newsList = res.data.items;
+        if (newsList.length <= 4) return newsList;
+        for (let news of newsList) {
+          if (sortNews.length >= 4) break;
+          if (news.title.includes(ngoName)) {
+            sortNews.push();
+          }
+        }
+        let i = newsList.length-1;
+        while (sortNews.length <= 4) {
+          sortNews.push(newsList[i]);
+          i--;
+        }
+      })
+      .catch(err => console.log(err))
+    return sortNews;
   }
 
-  getMyPage() {
-    
+  async getMyPage(userId) {
+    const userInfoDB = await this.userRepository.findOne({
+      where: {
+        id: userId
+      },
+      relations: ["donates", "donates.ngo", "ngocategorys", "ngocategorys.category"]
+    });
   }
 }

@@ -39,13 +39,13 @@ export class User {
   })
   refreshToken: string;
 
-  @OneToMany(type => Pocket, pocket => pocket.userId)
+  @OneToMany(type => Pocket, pocket => pocket.user)
   pockets: Pocket[];
 
-  @OneToMany(type => Donate, donate => donate.userId)
+  @OneToMany(type => Donate, donate => donate.user)
   donates: Donate[];
 
-  @OneToMany(type => Like, like => like.userId)
+  @OneToMany(type => Like, like => like.user)
   likes: Like[];
 
 }

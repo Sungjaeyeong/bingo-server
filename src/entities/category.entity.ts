@@ -9,6 +9,11 @@ export class Category {
   @Column()
   name: string;
 
-  @OneToMany(type => NgoCategory, ngocategory => ngocategory.categoryId)
+  @Column({
+    nullable: true,
+  })
+  coverImage: string;
+
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.category)
   ngocategorys: NgoCategory[];
 }
