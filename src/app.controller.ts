@@ -1,4 +1,4 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
 import { AppService } from "./app.service";
 
 @Controller()
@@ -16,17 +16,17 @@ export class AppController {
   }
 
   @Get("/listpage")
-  getListPage() {
-    return this.appService.getListPage();
+  getListPage(@Res() res) {
+    return this.appService.getListPage(res);
   }
 
-  @Get("/contentpage")
-  getContentPage() {
-    return this.appService.getContentPage();
+  @Get("/contentpage/:ngo_id")
+  getContentPage(@Param('ngo_id') ngoId: number, @Res() res) {
+    return this.appService.getContentPage(ngoId, res);
   }
 
   @Get("/mypage")
-  getMyPage() {
-    return this.appService.getMyPage();
+  getMyPage(@Query('user_id') userId) {
+    return this.appService.getMyPage(userId);
   }
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, JoinColumn } from 'typeorm';
 import { Donate } from './donate.entity';
 import { Like } from './like.entity';
 import { NgoCategory } from './ngocategory.entity';
@@ -31,16 +31,17 @@ export class Ngo {
   })
   since: number;
 
-  @OneToMany(type => Pocket, pocket => pocket.ngoId)
+  @OneToMany(type => Pocket, pocket => pocket.ngo)
   pockets: Pocket[];
 
-  @OneToMany(type => Donate, donate => donate.ngoId)
+  @OneToMany(type => Donate, donate => donate.ngo)
   donates: Donate[];
 
-  @OneToMany(type => Like, like => like.ngoId)
+  @OneToMany(type => Like, like => like.ngo)
   likes: Like[];
 
-  @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngoId)
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngo)
+  @JoinColumn()
   ngocategorys: NgoCategory[];
 
 }

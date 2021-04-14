@@ -14,6 +14,6 @@ export class Category {
   })
   coverImage: string;
 
-  @OneToMany(type => NgoCategory, ngocategory => ngocategory.categoryId)
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.category)
   ngocategorys: NgoCategory[];
 }
