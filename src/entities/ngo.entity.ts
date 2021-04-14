@@ -18,17 +18,18 @@ export class Ngo {
   @Column()
   logo: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   video: string;
-
-  @Column()
-  coverImage: string;
 
   @Column()
   description: string;
 
-  @Column()
-  since: string;
+  @Column({
+    nullable: true,
+  })
+  since: number;
 
   @OneToMany(type => Pocket, pocket => pocket.ngoId)
   pockets: Pocket[];
