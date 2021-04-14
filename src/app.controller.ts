@@ -10,9 +10,14 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get("/testcookie")
+  getTestCookie(@Req() req): boolean {
+    return this.appService.getTestCookie(req);
+  }
+
   @Get("/testpage")
-  getTestPage(@Req() req): boolean {
-    return this.appService.getTestPage(req);
+  getTestPage(@Query('options') options) {
+    return this.appService.getTestPage(options);
   }
 
   @Get("/listpage")

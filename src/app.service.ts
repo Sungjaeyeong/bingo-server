@@ -1,14 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
-import { Repository } from 'typeorm';
+import { or } from 'sequelize';
+import { In, Repository } from 'typeorm';
 import { Ngo } from './entities/ngo.entity';
+import { NgoCategory } from './entities/ngocategory.entity';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectRepository(Ngo) private ngoRepository: Repository<Ngo>,
+    @InjectRepository(NgoCategory) private ngocategoryRepository: Repository<NgoCategory>,
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
@@ -16,12 +19,93 @@ export class AppService {
     return "Hello World!";
   }
 
-  getTestPage(req) {
+  getTestCookie(req) {
     if (req.cookies.test) {
       return true;
     } else {
       return false;
     }
+  }
+
+  async getTestPage(options) {
+    options = JSON.parse(options)
+    const ngocategoryInfoDB = await this.ngocategoryRepository.find({
+      where: {
+        categoryId: In(options.selectedOptions)
+      }
+    });
+    const ngoIndexs = ngocategoryInfoDB.map(el => el.ngoId);
+    const ngoDB = await this.ngoRepository.find({
+      where: {
+        id: In(ngoIndexs)
+      },
+      relations: ["ngocategorys"]
+    });
+
+    let ngocategoryIds = [];
+    for (let ngoIdx=0; ngoIdx<ngoDB.length; ngoIdx++) {
+      let categoryIds = [];
+      for (let i=0; i<ngoDB[ngoIdx].ngocategorys.length; i++) {
+        categoryIds.push(ngoDB[ngoIdx].ngocategorys[i].categoryId)
+      }
+      ngocategoryIds.push([ngoDB[ngoIdx].id, categoryIds]);
+    }
+
+    let max = 0;
+    let countArray = [];
+    for (let el of ngocategoryIds) {
+      let count = 0;
+      for(let i=0; i<el[1].length; i++) {
+        if(options.postOptions.includes(el[1][i])) count++;
+      }
+      countArray.push([el[0], count]);
+      if (count > max) max = count;
+    }
+    const resultList = countArray.filter(el => el[1] === max);
+    const idOfresultList = resultList.map(el => el[0]);
+    const resultIdx = Math.floor(Math.random() * resultList.length);
+    const ngoId = resultList[resultIdx][0];
+    if (options.postOrder) {
+      return await this.ngoRepository.findOne({
+        where: {
+          id: In(idOfresultList)
+        },
+        order: {
+          since: 'DESC'
+        }
+      });
+    } else {
+      return await this.ngoRepository.findOne({
+        where: {
+          id: ngoId
+        }
+      });
+    }
+    
+    // let maxIdx = 0;
+    // let max = 0;
+    // let countArray = [];
+    // let resultList = [];
+    // for (const key in ngocategoryIds) {
+    //   let count = 0;
+    //   let value = ngocategoryIds[key];
+    //   for (let i=0; i<value.length; i++) {
+    //     if (options.includes(String(value[i]))) count++;
+    //   }
+    //   countArray.push(count);
+    //   if (count > max) {
+    //     max = count;
+    //     maxIdx = Number(key);
+    //   }
+    // }
+    // for (let i=0; i<countArray.length; i++) {
+    //   if (countArray[i] === max) resultList.push(i);
+    // }
+    // console.log(resultList)
+    // const resultIdx = Math.floor(Math.random() * resultList.length);
+
+    // console.log(resultIdx)
+    // return ngoInfoDB[resultList[resultIdx]];
   }
 
   async getListPage(res) {
@@ -54,8 +138,8 @@ export class AppService {
           display: 100,
         },
         headers: {
-          'X-Naver-Client-Id' : "HqssrkcezIYM9NmnWQHs",
-          'X-Naver-Client-Secret': "2UMTPrP4Ua",
+          'X-Naver-Client-Id': process.env.NAVER_CLIENT_ID,
+          'X-Naver-Client-Secret': process.env.NAVER_CLIENT_SECRET,
         }
       })
       .then(res => {
@@ -78,6 +162,11 @@ export class AppService {
   }
 
   async getMyPage(userId) {
-    
+    const userInfoDB = await this.userRepository.findOne({
+      where: {
+        id: userId
+      },
+      relations: ["donates", "donates.ngo", "ngocategorys", "ngocategorys.category"]
+    });
   }
 }
