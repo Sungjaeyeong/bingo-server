@@ -32,11 +32,50 @@ export class AppService {
   }
 
   async getContentPage(ngoId, res) {
-    
+    const ngoInfoDB = await this.ngoRepository.findOne({
+      where: { id: ngoId },
+      relations: ["ngocategorys", "ngocategorys.category"]
+    });
+    if (!ngoInfoDB) {
+      res.status(404).send('Not Found');
+    } else {
+      const newsList = await this.getNews(ngoInfoDB.name);
+      res.send({ data: ngoInfoDB, newsList, });
+    }
     
   }
 
-  
+  async getNews(ngoName) {
+    let sortNews = [];
+    await axios
+      .get(`https://openapi.naver.com/v1/search/news.json`,{
+        params: {
+          query: ngoName,
+          display: 100,
+        },
+        headers: {
+          'X-Naver-Client-Id' : "HqssrkcezIYM9NmnWQHs",
+          'X-Naver-Client-Secret': "2UMTPrP4Ua",
+        }
+      })
+      .then(res => {
+        const newsList = res.data.items;
+        if (newsList.length <= 4) return newsList;
+        for (let news of newsList) {
+          if (sortNews.length >= 4) break;
+          if (news.title.includes(ngoName)) {
+            sortNews.push();
+          }
+        }
+        let i = newsList.length-1;
+        while (sortNews.length <= 4) {
+          sortNews.push(newsList[i]);
+          i--;
+        }
+      })
+      .catch(err => console.log(err))
+    return sortNews;
+  }
 
   async getMyPage(userId) {
     
