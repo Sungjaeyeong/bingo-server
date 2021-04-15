@@ -4,11 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/user.module';
 import { DonatesModule } from './modules/donate.module';
-import { LikesModule } from './modules/like.module';
+import { LikesModule } from './modules/love.module';
 import { PocketsModule } from './modules/pocket.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Like } from './entities/like.entity';
+import { Love } from './entities/love.entity';
 import { Pocket } from './entities/pocket.entity';
 import { NgoCategory } from './entities/ngocategory.entity';
 import { Ngo } from './entities/ngo.entity';
@@ -27,7 +27,7 @@ import { Category } from './entities/category.entity';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: 'nest',
-      entities: [User, Category, Donate, Like, Ngo, NgoCategory, Pocket],
+      entities: [User, Category, Donate, Love, Ngo, NgoCategory, Pocket],
       synchronize: true,
     }),
   ],

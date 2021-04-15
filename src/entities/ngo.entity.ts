@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, JoinColumn } from 'typeorm';
 import { Donate } from './donate.entity';
-import { Like } from './like.entity';
+import { Love } from './love.entity';
 import { NgoCategory } from './ngocategory.entity';
 import { Pocket } from './pocket.entity';
 
@@ -37,8 +37,8 @@ export class Ngo {
   @OneToMany(type => Donate, donate => donate.ngo)
   donates: Donate[];
 
-  @OneToMany(type => Like, like => like.ngo)
-  likes: Like[];
+  @OneToMany(type => Love, love => love.ngo)
+  loves: Love[];
 
   @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngo)
   @JoinColumn()

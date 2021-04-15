@@ -93,15 +93,22 @@ export class AppService {
   async getContentPage(ngoId, res) {
     const ngoInfoDB = await this.ngoRepository.findOne({
       where: { id: ngoId },
-      relations: ["donates", "ngocategorys", "ngocategorys.category"]
+      relations: ["donates.user", "donates", "ngocategorys", "ngocategorys.category"]
     });
     if (!ngoInfoDB) {
       res.status(404).send('Not Found');
     } else {
       const newsList = await this.getNews(ngoInfoDB.name);
-      const messageList = ngoInfoDB.donates.slice(0, 3);
+      const message = ngoInfoDB.donates.slice(0, 3);
+      const messageList = message.map(el => {
+        return {...el, user: {
+          username: el.user.username,
+          profileImage: el.user.profileImage,
+          level: el.user.level
+        }}
+      })
       delete ngoInfoDB.donates;
-      res.send({ data: ngoInfoDB, newsList, messageList, });
+      res.send({ data: ngoInfoDB, newsList, messageList });
     }
     
   }
