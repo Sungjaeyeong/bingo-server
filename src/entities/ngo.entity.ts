@@ -1,8 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, JoinColumn } from 'typeorm';
-import { Donate } from './donate.entity';
-import { Like } from './like.entity';
-import { NgoCategory } from './ngocategory.entity';
-import { Pocket } from './pocket.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+  JoinColumn,
+} from "typeorm";
+import { Donate } from "./donate.entity";
+import { Like } from "./like.entity";
+import { NgoCategory } from "./ngocategory.entity";
+import { Pocket } from "./pocket.entity";
 
 @Entity()
 export class Ngo {
@@ -29,7 +36,7 @@ export class Ngo {
   @Column({
     nullable: true,
   })
-  since: number;
+  since: string;
 
   @OneToMany(type => Pocket, pocket => pocket.ngo)
   pockets: Pocket[];
@@ -43,5 +50,4 @@ export class Ngo {
   @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngo)
   @JoinColumn()
   ngocategorys: NgoCategory[];
-
 }
