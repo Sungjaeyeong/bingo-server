@@ -29,7 +29,7 @@ export class Ngo {
   @Column({
     nullable: true,
   })
-  since: number;
+  since: string;
 
   @OneToMany(type => Pocket, pocket => pocket.ngo)
   pockets: Pocket[];
