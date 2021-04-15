@@ -20,6 +20,9 @@ export class Donate {
   ing: boolean;
 
   @Column()
+  message: string;
+
+  @Column()
   userId: number;
 
   @Column()
