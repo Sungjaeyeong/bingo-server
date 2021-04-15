@@ -3,7 +3,7 @@ import { Ngo } from './ngo.entity';
 import { User } from './user.entity';
 
 @Entity()
-export class Like {
+export class Love {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -13,9 +13,9 @@ export class Like {
   @Column()
   ngoId: number;
 
-  @ManyToOne(type => User, user => user.likes)
+  @ManyToOne(type => User, user => user.loves)
   user: User;
 
-  @ManyToOne(type => Ngo, ngo => ngo.likes)
+  @ManyToOne(type => Ngo, ngo => ngo.loves)
   ngo: Ngo;
 }

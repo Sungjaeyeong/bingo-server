@@ -28,7 +28,8 @@ export class UserService {
           data: { 
             id: (await userInfoDB).id, 
             username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage 
+            profileImage: (await userInfoDB).profileImage,
+            ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId), 
           }
         })
       })
@@ -47,7 +48,8 @@ export class UserService {
             data: { 
               id: (await userInfoDB).id, 
               username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
+              profileImage: (await userInfoDB).profileImage,
+              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId) 
             }
           })
         })
@@ -60,7 +62,8 @@ export class UserService {
         data: { 
           id: null, 
           username: null,
-          profileImage: null
+          profileImage: null,
+          ngoIdOfLoveList: null  
         }
       })
     }
@@ -105,10 +108,10 @@ export class UserService {
           data: { 
             id: (await userInfoDB).id, 
             username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage 
+            profileImage: (await userInfoDB).profileImage, 
+            ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
           }
         })
-        console.log(res.data)
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
@@ -125,7 +128,8 @@ export class UserService {
             data: { 
               id: (await userInfoDB).id, 
               username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
+              profileImage: (await userInfoDB).profileImage,
+              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
             }
           })
         })
@@ -138,7 +142,8 @@ export class UserService {
         data: { 
           id: null, 
           username: null,
-          profileImage: null
+          profileImage: null,
+          ngoIdOfLoveList: null
         }
       })
     }
@@ -147,7 +152,10 @@ export class UserService {
   // DB에서 유저정보 가져오기
   async getUserInfo(accessToken: string) {
     const userInfoDB: User = await this.userRepository.findOne({
-      accessToken,
+      where: {
+        accessToken
+      },
+      relations: ["loves"]
     })
     return userInfoDB;
   }
@@ -204,7 +212,7 @@ export class UserService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000",
+          redirect_uri: "https://localhost:3000/guide.html",
           grant_type: "authorization_code",
         })
         .then(response => {
@@ -255,7 +263,7 @@ export class UserService {
         params: {
           client_id: process.env.KAKAO_CLIENT_ID,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000",
+          redirect_uri: "https://localhost:3000/guide.html",
           grant_type: "authorization_code",
         },
       })
