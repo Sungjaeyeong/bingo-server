@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, Res } from "@nestjs/common";
 import { AppService } from "./app.service";
 
 @Controller()
@@ -16,7 +16,7 @@ export class AppController {
   }
 
   @Get("/testpage")
-  getTestPage(@Query('options') options) {
+  getTestPage(@Query("options") options) {
     return this.appService.getTestPage(options);
   }
 
@@ -26,12 +26,12 @@ export class AppController {
   }
 
   @Get("/contentpage/:ngo_id")
-  getContentPage(@Param('ngo_id') ngoId: number, @Res() res) {
+  getContentPage(@Param("ngo_id") ngoId: number, @Res() res) {
     return this.appService.getContentPage(ngoId, res);
   }
 
   @Get("/mypage")
-  getMyPage(@Query('user_id') userId) {
+  getMyPage(@Query("user_id") userId) {
     return this.appService.getMyPage(userId);
   }
 }

@@ -1,8 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, JoinColumn } from 'typeorm';
-import { Donate } from './donate.entity';
-import { Love } from './love.entity';
-import { NgoCategory } from './ngocategory.entity';
-import { Pocket } from './pocket.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+  JoinColumn,
+} from "typeorm";
+import { Donate } from "./donate.entity";
+import { Love } from "./love.entity";
+import { NgoCategory } from "./ngocategory.entity";
+import { Pocket } from "./pocket.entity";
 
 @Entity()
 export class Ngo {
@@ -43,5 +50,4 @@ export class Ngo {
   @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngo)
   @JoinColumn()
   ngocategorys: NgoCategory[];
-
 }

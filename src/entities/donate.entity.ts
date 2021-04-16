@@ -1,7 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Ngo } from './ngo.entity';
-import { User } from './user.entity';
-
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Ngo } from "./ngo.entity";
+import { User } from "./user.entity";
 @Entity()
 export class Donate {
   @PrimaryGeneratedColumn()
