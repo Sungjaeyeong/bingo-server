@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Donate } from './donate.entity';
-import { Like } from './like.entity';
+import { Love } from './love.entity';
 import { Pocket } from './pocket.entity';
 
 @Entity()
@@ -45,7 +45,7 @@ export class User {
   @OneToMany(type => Donate, donate => donate.user)
   donates: Donate[];
 
-  @OneToMany(type => Like, like => like.user)
-  likes: Like[];
+  @OneToMany(type => Love, love => love.user)
+  loves: Love[];
 
 }
