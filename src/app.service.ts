@@ -150,7 +150,32 @@ export class AppService {
       where: {
         id: userId
       },
-      relations: ["donates", "donates.ngo", "ngocategorys", "ngocategorys.category"]
+      relations: ["loves", "loves.ngo", "loves.ngo.ngocategorys", "loves.ngo.ngocategorys.category", "donates", "donates.ngo", "donates.ngo.ngocategorys", "donates.ngo.ngocategorys.category"]
     });
+    const loves = userInfoDB.loves.map(el => {
+      return {
+        ngoId: el.ngo.id,
+        ngoName: el.ngo.name,
+        categoryName: el.ngo.ngocategorys.map(category => category.category.name)
+      }
+    })
+    const donates = userInfoDB.donates.map(el => {
+      return {
+        money: el.money,
+        createdAt: el.createdAt,
+        updatedAt: el.updatedAt,
+        type: el.type,
+        ing: el.ing,
+        ngo: {
+          ngoId: el.ngo.id,
+          ngoName: el.ngo.name,
+          categoryName: el.ngo.ngocategorys.map(category => category.category.name)
+        }
+      }
+    })
+    return {
+      loves,
+      donates,
+    }
   }
 }

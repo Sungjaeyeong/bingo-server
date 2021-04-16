@@ -13,6 +13,11 @@ export class Donate {
   @Column()
   createdAt: Date;
 
+  @Column({
+    nullable: true,
+  })
+  updatedAt: Date;
+
   @Column()
   type: string;
 
