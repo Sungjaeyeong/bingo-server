@@ -13,10 +13,6 @@ import { PocketService } from "src/services/pocket.service";
 @Controller()
 export class PocketController {
   constructor(private readonly pocketService: PocketService) {}
-  @Get()
-  home() {
-    return "Welcome Home";
-  }
 
   @Get("/paypage")
   getPayPage(@Req() req, @Res() res) {

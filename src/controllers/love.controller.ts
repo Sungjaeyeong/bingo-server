@@ -1,19 +1,17 @@
-import { Controller, Delete, Get, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Res, Req } from '@nestjs/common';
+import { LoveService } from "src/services/love.service";
 
 @Controller()
 export class LikeController {
-  @Get()
-  home() {
-    return 'Welcome Home';
+  constructor(private readonly loveService: LoveService) {}
+
+  @Post('/love')
+  insertLike(@Req() req, @Res() res) {
+    return this.loveService.postLove(req, res);
   }
 
-  @Post('/like')
-  insertLike(): string {
-    return "This is like"
-  }
-
-  @Delete('/like')
-  deletelike(): string {
-    return "This is BINGO"
+  @Delete('/love')
+  deletelike(@Req() req, @Res() res) {
+    return this.loveService.deleteLove(req, res);
   }
 }
