@@ -24,38 +24,46 @@ export class UserService {
       })
       .then(async (res) => {
         const userInfoDB = this.getUserInfo(accessToken);
-        response.status(200).send({ 
-          data: { 
-            id: (await userInfoDB).id, 
-            username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage,
-            ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId), 
-          }
-        })
-      })
-      .catch(async () => {
-        const userInfoDB = this.getUserInfo(accessToken);
-        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('k_accessToken', newAccessToken, {
-            domain: 'localhost',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
           response.status(200).send({ 
             data: { 
               id: (await userInfoDB).id, 
               username: (await userInfoDB).username, 
               profileImage: (await userInfoDB).profileImage,
-              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId) 
+              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId), 
             }
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+        }
+      })
+      .catch(async () => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
+          this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+          .then(async (newAccessToken) => {
+            response.cookie('k_accessToken', newAccessToken, {
+              domain: 'localhost',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'none'
+            });
+            response.status(200).send({ 
+              data: { 
+                id: (await userInfoDB).id, 
+                username: (await userInfoDB).username, 
+                profileImage: (await userInfoDB).profileImage,
+                ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId) 
+              }
+            })
+          })
+          .catch(async () => {
+            response.send('RefreshToken is expired');
+          })
+        }
       })
     } else {
       response.status(200).send({ 
@@ -104,38 +112,46 @@ export class UserService {
       },)
       .then(async (res) => {
         const userInfoDB = this.getUserInfo(accessToken);
-        response.status(200).send({ 
-          data: { 
-            id: (await userInfoDB).id, 
-            username: (await userInfoDB).username, 
-            profileImage: (await userInfoDB).profileImage, 
-            ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
-          }
-        })
-      })
-      .catch(async () => {
-        const userInfoDB = this.getUserInfo(accessToken);
-        this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('accessToken', newAccessToken, {
-            domain: 'localhost',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
           response.status(200).send({ 
             data: { 
               id: (await userInfoDB).id, 
               username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage,
+              profileImage: (await userInfoDB).profileImage, 
               ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
             }
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+        }
+      })
+      .catch(async () => {
+        const userInfoDB = this.getUserInfo(accessToken);
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
+          this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+          .then(async (newAccessToken) => {
+            response.cookie('accessToken', newAccessToken, {
+              domain: 'localhost',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'none'
+            });
+            response.status(200).send({ 
+              data: { 
+                id: (await userInfoDB).id, 
+                username: (await userInfoDB).username, 
+                profileImage: (await userInfoDB).profileImage,
+                ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
+              }
+            })
+          })
+          .catch(async () => {
+            response.send('RefreshToken is expired');
+          })
+        }
       })
     } else {
       response.status(200).send({ 
@@ -227,6 +243,8 @@ export class UserService {
           res.status(200).send({ accessToken: response.data.access_token });
         })
         .catch(err => console.log("googleLogin err"));
+    } else {
+      res.status(404).send('Not Found Google authorizationCode');
     }
   }
 
@@ -258,6 +276,7 @@ export class UserService {
   }
 
   async kakaoLogin(bodyData, res) {
+    if (bodyData.authorizationCode) {
     await axios
       .post("https://kauth.kakao.com/oauth/token",{} ,{
         params: {
@@ -279,6 +298,9 @@ export class UserService {
         res.status(200).send({ accessToken: response.data.access_token });
       })
       .catch(err => console.log('kakaoLogin err'));
+    } else {
+      res.status(404).send('Not Found Kakao authorizationCode');
+    }
   }
 
   // 카카오에서 정보 받아오기
@@ -306,7 +328,6 @@ export class UserService {
   }
 
   async logout(req, res) {
-    console.log('a')
     if (req.cookies.k_accessToken || req.cookies.accessToken) {
       res.clearCookie('k_accessToken', {
         domain: 'localhost',
@@ -360,5 +381,3 @@ export class UserService {
     
   }
 }
-
-
