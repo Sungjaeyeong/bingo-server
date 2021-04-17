@@ -9,9 +9,7 @@ export class PocketService {
     @InjectRepository(Pocket)
     private pocketRepository: Repository<Pocket>
   ) {}
-  getHello(): string {
-    return "Hello World!";
-  }
+
   async getPaypage(req, res) {
     const payInfo = await this.pocketRepository.find();
     console.log("check_paypage:", payInfo);
