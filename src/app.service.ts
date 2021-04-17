@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
-import { or } from 'sequelize';
 import { In, Repository } from 'typeorm';
 import { Ngo } from './entities/ngo.entity';
 import { NgoCategory } from './entities/ngocategory.entity';
@@ -91,6 +90,7 @@ export class AppService {
   }
 
   async getContentPage(ngoId, res) {
+    if (!ngoId) return res.status(422).send('Required parameters are insufficient');
     const ngoInfoDB = await this.ngoRepository.findOne({
       where: { id: ngoId },
       relations: ["donates.user", "donates", "ngocategorys", "ngocategorys.category"]
@@ -146,36 +146,41 @@ export class AppService {
   }
 
   async getMyPage(userId) {
+    if (!userId) return 'Required parameters are insufficient';
     const userInfoDB = await this.userRepository.findOne({
       where: {
         id: userId
       },
       relations: ["loves", "loves.ngo", "loves.ngo.ngocategorys", "loves.ngo.ngocategorys.category", "donates", "donates.ngo", "donates.ngo.ngocategorys", "donates.ngo.ngocategorys.category"]
     });
-    const loves = userInfoDB.loves.map(el => {
-      return {
-        ngoId: el.ngo.id,
-        ngoName: el.ngo.name,
-        categoryName: el.ngo.ngocategorys.map(category => category.category.name)
-      }
-    })
-    const donates = userInfoDB.donates.map(el => {
-      return {
-        money: el.money,
-        createdAt: el.createdAt,
-        updatedAt: el.updatedAt,
-        type: el.type,
-        ing: el.ing,
-        ngo: {
+    if (!userInfoDB) {
+      return 'Not Found';
+    } else {
+      const loves = userInfoDB.loves.map(el => {
+        return {
           ngoId: el.ngo.id,
           ngoName: el.ngo.name,
           categoryName: el.ngo.ngocategorys.map(category => category.category.name)
         }
+      })
+      const donates = userInfoDB.donates.map(el => {
+        return {
+          money: el.money,
+          createdAt: el.createdAt,
+          updatedAt: el.updatedAt,
+          type: el.type,
+          ing: el.ing,
+          ngo: {
+            ngoId: el.ngo.id,
+            ngoName: el.ngo.name,
+            categoryName: el.ngo.ngocategorys.map(category => category.category.name)
+          }
+        }
+      })
+      return {
+        loves,
+        donates,
       }
-    })
-    return {
-      loves,
-      donates,
     }
   }
 }

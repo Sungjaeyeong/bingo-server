@@ -14,19 +14,20 @@ export class DonateService {
 
   async postDonate(req, res) {
     const data = req.body;
-    if(data.userId || data.ngoId || data.money || data.type || data.ing) {
+    if(!(data.userId && data.ngoId && data.money && data.type && data.ing)) {
       let now = new Date();
       const curTime = dateFormat(now, "isoDateTime");
-      console.log(curTime);
       req.body.createdAt = curTime;
-      await this.donateRepository.save(req.body);
-      res.send("sucessful");
+      await this.donateRepository.save(req.body)
+      .catch(() => res.status(404).send("Failed"))
+      res.send("Successfully recorded");
     } else {
-      res.status(400).send("body data not authorization")
+      res.status(422).send("Required parameters are insufficient")
     }
   }
 
   async patchDonate(req, res) {
+    if (!(req.body.donateId && req.body.ing && req.body.updatedAt)) return res.status(422).send("Required parameters are insufficient");
     const donateInfo = await this.donateRepository.findOne({
       id: req.body.donateId
     })
@@ -34,10 +35,11 @@ export class DonateService {
       donateInfo.ing = req.body.ing;
       let now = new Date();
       donateInfo.updatedAt = dateFormat(now, "isoDateTime"); 
-      await this.donateRepository.save(donateInfo);
-      res.send("sucessful");
+      await this.donateRepository.save(donateInfo)
+      .catch(() => res.status(400).send("Failed"))
+      res.send("Successfully recorded");
     } else {
-      res.status(400).send("donateInfo not found");
+      res.status(404).send("donateInfo not found");
     }
   }
 

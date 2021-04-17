@@ -12,36 +12,38 @@ export class LoveService {
   ) {}
 
   async postLove(req, res) {
-    if(req.body.userId || req.body.ngoId) {
+    if(req.body.userId && req.body.ngoId) {
       const loveInfo = await this.loveRepository.findOne({
         userId: req.body.userId,
         ngoId: req.body.ngoId
       })
       if(!loveInfo) {
         await this.loveRepository.save(req.body)
-        res.send("sucessful");
+        .catch(() => res.status(400).send("Failed"))
+        res.send("Successfully recorded");
       } else {
-        res.send("already loved");
+        res.send("already exists");
       }
     } else {
-      res.status(400).send("not authorization");
+      res.status(422).send("Required parameters are insufficient");
     }
   }
 
   async deleteLove(req, res) {
-    if(req.body.userId || req.body.ngoId) {
+    if(req.body.userId && req.body.ngoId) {
       const loveInfo = await this.loveRepository.findOne({
         userId: req.body.userId,
         ngoId: req.body.ngoId
       });
       if(loveInfo) {
-        await this.loveRepository.remove(loveInfo);
+        await this.loveRepository.remove(loveInfo)
+        .catch(() => res.status(400).send("Failed"))
         res.send("Successfully deleted");
       } else {
         res.send("no one delete");
       }
     } else {
-      res.status(400).send("not authorization");
+      res.status(422).send("Required parameters are insufficient");
     }
   }
 
