@@ -340,6 +340,25 @@ export class UserService {
         .catch(err => console.log('kakaoLogout err'));
     }
   }
+
+  async editUserinfo(bodyData, res) {
+    if (!(bodyData.userId && bodyData.username && bodyData.profileImage)) {
+      return res.status(422).send('required parameters are insufficient')
+    }
+    const { userId, username, profileImage } = bodyData;
+    const userInfoDB: User = await this.userRepository.findOne({
+      id: userId,
+    })
+    if (!userInfoDB) {
+      res.status(404).send('Not Found');
+    } else {
+      userInfoDB.username = username;
+      userInfoDB.profileImage = profileImage;
+      await this.userRepository.save(userInfoDB);
+      res.status(200).send('Successfully updated');
+    }
+    
+  }
 }
 
 
