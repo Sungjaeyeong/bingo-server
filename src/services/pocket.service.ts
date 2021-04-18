@@ -32,7 +32,7 @@ export class PocketService {
       }
     })
     if (pocketInfo) { 
-      res.send("Already Exists") 
+      res.status(400).send("Already Exists") 
     } else {
       await this.pocketRepository.save(bodyData)
       .catch(() => res.send("Failed"))
@@ -41,21 +41,20 @@ export class PocketService {
   }
 
   async editPocket(bodyData, res) {
-    if (!(bodyData.userId && bodyData.ngoId && bodyData.type && bodyData.money)) return res.status(422).send('Required parameters are insufficient');
-    const { userId, ngoId, type, money } = bodyData;
+    if (!(bodyData.pocketId && bodyData.money)) return res.status(422).send('Required parameters are insufficient');
+    const { pocketId, type, money } = bodyData;
     const pocketInfo = await this.pocketRepository.findOne({
       where: {
-        userId,
-        ngoId,
+        id: pocketId,
       }
     })
     if (!pocketInfo) {
       res.status(404).send('Not Found');
     } else {
-      pocketInfo.type = type;
+      if (type) pocketInfo.type = type;
       pocketInfo.money = money;
       await this.pocketRepository.save(pocketInfo)
-      .catch(() => res.send("Failed"))
+      .catch(() => res.status(400).send("Failed"))
       res.send("Successfully updated")
     }
   }

@@ -3,8 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
-  Put,
   Query,
   Res,
 } from "@nestjs/common";
@@ -24,7 +24,7 @@ export class PocketController {
     return this.pocketService.insertPocket(bodyData, res);
   }
 
-  @Put("/pocket")
+  @Patch("/pocket")
   editPocket(@Body() bodyData, @Res() res) {
     return this.pocketService.editPocket(bodyData, res);
   }

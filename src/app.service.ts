@@ -26,7 +26,7 @@ export class AppService {
     }
   }
 
-  async getTestPage(options) {
+  async getTestPage(options, res) {
     options = JSON.parse(options)
     const ngocategoryInfoDB = await this.ngocategoryRepository.find({
       where: {
@@ -64,21 +64,28 @@ export class AppService {
     const idOfresultList = resultList.map(el => el[0]);
     const resultIdx = Math.floor(Math.random() * resultList.length);
     const ngoId = resultList[resultIdx][0];
+    res.cookie('test', 'yes', {
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none'
+    });
     if (options.postOrder) {
-      return await this.ngoRepository.findOne({
+      res.send(await this.ngoRepository.findOne({
         where: {
           id: In(idOfresultList)
         },
         order: {
           since: 'DESC'
         }
-      });
+      }))
     } else {
-      return await this.ngoRepository.findOne({
+      res.send(await this.ngoRepository.findOne({
         where: {
           id: ngoId
         }
-      });
+      }))
     }
   }
 
@@ -165,6 +172,7 @@ export class AppService {
       })
       const donates = userInfoDB.donates.map(el => {
         return {
+          donateId: el.id,
           money: el.money,
           createdAt: el.createdAt,
           updatedAt: el.updatedAt,
