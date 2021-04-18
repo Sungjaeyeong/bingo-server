@@ -16,8 +16,8 @@ export class AppController {
   }
 
   @Get("/testpage")
-  getTestPage(@Query("options") options) {
-    return this.appService.getTestPage(options);
+  getTestPage(@Query("options") options, @Res() res) {
+    return this.appService.getTestPage(options, res);
   }
 
   @Get("/listpage")

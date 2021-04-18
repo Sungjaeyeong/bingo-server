@@ -22,7 +22,7 @@ export class LoveService {
         .catch(() => res.status(400).send("Failed"))
         res.send("Successfully recorded");
       } else {
-        res.send("already exists");
+        res.status(400).send("already exists");
       }
     } else {
       res.status(422).send("Required parameters are insufficient");
@@ -40,7 +40,7 @@ export class LoveService {
         .catch(() => res.status(400).send("Failed"))
         res.send("Successfully deleted");
       } else {
-        res.send("no one delete");
+        res.status(404).send("no one delete");
       }
     } else {
       res.status(422).send("Required parameters are insufficient");

@@ -14,7 +14,7 @@ export class DonateService {
 
   async postDonate(req, res) {
     const data = req.body;
-    if(!(data.userId && data.ngoId && data.money && data.type && data.ing)) {
+    if((data.userId && data.ngoId && data.money && data.type && data.ing)) {
       let now = new Date();
       const curTime = dateFormat(now, "isoDateTime");
       req.body.createdAt = curTime;
@@ -27,7 +27,7 @@ export class DonateService {
   }
 
   async patchDonate(req, res) {
-    if (!(req.body.donateId && req.body.ing && req.body.updatedAt)) return res.status(422).send("Required parameters are insufficient");
+    if (!(req.body.donateId && req.body.ing)) return res.status(422).send("Required parameters are insufficient");
     const donateInfo = await this.donateRepository.findOne({
       id: req.body.donateId
     })
