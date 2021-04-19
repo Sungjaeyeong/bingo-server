@@ -12,7 +12,8 @@ export class PocketService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async getPaypage(userId, res) {
+  async getPaypage(userId, headers, res) {
+    if (!headers.authorization) return res.status(403).send('No permission');
     if (!userId) return res.status(422).send('Required parameters are insufficient');
     const pocketInfo = await this.pocketRepository.find({
       where: {
@@ -24,6 +25,7 @@ export class PocketService {
   }
 
   async insertPocket(bodyData, res) {
+    if (!bodyData.accessToken) return res.status(403).send('No permission');
     if (!(bodyData.userId && bodyData.ngoId && bodyData.type && bodyData.money)) return res.status(422).send('Required parameters are insufficient');
     const pocketInfo = await this.pocketRepository.findOne({
       where: {
@@ -41,6 +43,7 @@ export class PocketService {
   }
 
   async editPocket(bodyData, res) {
+    if (!bodyData.accessToken) return res.status(403).send('No permission');
     if (!(bodyData.pocketId && bodyData.money)) return res.status(422).send('Required parameters are insufficient');
     const { pocketId, type, money } = bodyData;
     const pocketInfo = await this.pocketRepository.findOne({
@@ -59,7 +62,8 @@ export class PocketService {
     }
   }
 
-  async deletePocket(bodyData, res) {
+  async deletePocket(headers, bodyData, res) {
+    if (!headers.authorization) return res.status(403).send('No permission');
     if (!bodyData.pocketId) return res.status(422).send('Required parameters are insufficient');
     const pocketInfo = await this.pocketRepository.findOne({
       id: bodyData.pocketId

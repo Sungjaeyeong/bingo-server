@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Patch,
   Post,
   Query,
@@ -15,8 +16,8 @@ export class PocketController {
   constructor(private readonly pocketService: PocketService) {}
 
   @Get("/paypage")
-  getPayPage(@Query("user_id") userId, @Res() res) {
-    return this.pocketService.getPaypage(userId, res);
+  getPayPage(@Query("user_id") userId, @Headers() headers, @Res() res) {
+    return this.pocketService.getPaypage(userId, headers, res);
   }
 
   @Post("/pocket")
@@ -30,7 +31,7 @@ export class PocketController {
   }
 
   @Delete("/pocket")
-  deletePocket(@Body() bodyData, @Res() res) {
-    return this.pocketService.deletePocket(bodyData, res);
+  deletePocket(@Headers() headers, @Body() bodyData, @Res() res) {
+    return this.pocketService.deletePocket(headers, bodyData, res);
   }
 }
