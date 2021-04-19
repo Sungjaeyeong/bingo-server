@@ -29,9 +29,11 @@ export class UserService {
         } else {
           response.status(200).send({ 
             data: { 
-              id: (await userInfoDB).id, 
+              userId: (await userInfoDB).id,
+              accessToken: (await userInfoDB).accessToken, 
               username: (await userInfoDB).username, 
               profileImage: (await userInfoDB).profileImage,
+              level: (await userInfoDB).level,
               ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId), 
             }
           })
@@ -53,9 +55,11 @@ export class UserService {
             });
             response.status(200).send({ 
               data: { 
-                id: (await userInfoDB).id, 
+                userId: (await userInfoDB).id,
+                accessToken: (await userInfoDB).accessToken, 
                 username: (await userInfoDB).username, 
                 profileImage: (await userInfoDB).profileImage,
+                level: (await userInfoDB).level,
                 ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId) 
               }
             })
@@ -68,9 +72,11 @@ export class UserService {
     } else {
       response.status(200).send({ 
         data: { 
-          id: null, 
+          userId: null,
+          accessToken: null, 
           username: null,
           profileImage: null,
+          level: null,
           ngoIdOfLoveList: null  
         }
       })
@@ -117,9 +123,11 @@ export class UserService {
         } else {
           response.status(200).send({ 
             data: { 
-              id: (await userInfoDB).id, 
+              userId: (await userInfoDB).id,
+              accessToken: (await userInfoDB).accessToken, 
               username: (await userInfoDB).username, 
               profileImage: (await userInfoDB).profileImage, 
+              level: (await userInfoDB).level,
               ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
             }
           })
@@ -141,9 +149,11 @@ export class UserService {
             });
             response.status(200).send({ 
               data: { 
-                id: (await userInfoDB).id, 
+                userId: (await userInfoDB).id,
+                accessToken: (await userInfoDB).accessToken, 
                 username: (await userInfoDB).username, 
                 profileImage: (await userInfoDB).profileImage,
+                level: (await userInfoDB).level,
                 ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
               }
             })
@@ -156,9 +166,11 @@ export class UserService {
     } else {
       response.status(200).send({ 
         data: { 
-          id: null, 
+          userId: null,
+          accessToken: null, 
           username: null,
           profileImage: null,
+          level: null,
           ngoIdOfLoveList: null
         }
       })

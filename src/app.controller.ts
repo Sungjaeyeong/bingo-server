@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req, Res } from "@nestjs/common";
+import { Controller, Get, Headers, Param, Query, Req, Res } from "@nestjs/common";
 import { AppService } from "./app.service";
 
 @Controller()
@@ -31,7 +31,7 @@ export class AppController {
   }
 
   @Get("/mypage")
-  getMyPage(@Query("user_id") userId) {
-    return this.appService.getMyPage(userId);
+  getMyPage(@Headers() Headers, @Query("user_id") userId) {
+    return this.appService.getMyPage(Headers, userId);
   }
 }

@@ -14,6 +14,7 @@ export class DonateService {
 
   async postDonate(req, res) {
     const data = req.body;
+    if(!data.accessToken) return res.status(403).send("No permission");
     if((data.userId && data.ngoId && data.money && data.type && data.ing)) {
       let now = new Date();
       const curTime = dateFormat(now, "isoDateTime");
@@ -27,6 +28,7 @@ export class DonateService {
   }
 
   async patchDonate(req, res) {
+    if(!req.body.accessToken) return res.status(403).send("No permission");
     if (!(req.body.donateId && req.body.ing)) return res.status(422).send("Required parameters are insufficient");
     const donateInfo = await this.donateRepository.findOne({
       id: req.body.donateId

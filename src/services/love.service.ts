@@ -12,6 +12,7 @@ export class LoveService {
   ) {}
 
   async postLove(req, res) {
+    if(!req.body.accessToken) return res.status(403).send('No permission');
     if(req.body.userId && req.body.ngoId) {
       const loveInfo = await this.loveRepository.findOne({
         userId: req.body.userId,
@@ -30,6 +31,7 @@ export class LoveService {
   }
 
   async deleteLove(req, res) {
+    if(!req.headers.authorization) return res.status(403).send('No permission');
     if(req.body.userId && req.body.ngoId) {
       const loveInfo = await this.loveRepository.findOne({
         userId: req.body.userId,

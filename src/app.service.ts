@@ -152,7 +152,8 @@ export class AppService {
     return sortNews;
   }
 
-  async getMyPage(userId) {
+  async getMyPage(headers, userId) {
+    if (!headers.authorization) return 'No permission';
     if (!userId) return 'Required parameters are insufficient';
     const userInfoDB = await this.userRepository.findOne({
       where: {
