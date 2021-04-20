@@ -240,7 +240,7 @@ export class UserService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000/guide.html",
+          redirect_uri: "https://localhost:3000/list",
           grant_type: "authorization_code",
         })
         .then(response => {
@@ -254,7 +254,7 @@ export class UserService {
           });
           res.status(200).send({ accessToken: response.data.access_token });
         })
-        .catch(err => console.log("googleLogin err"));
+        .catch(() => res.status(403).send('No permission'));
     } else {
       res.status(404).send('Not Found Google authorizationCode');
     }
@@ -294,7 +294,7 @@ export class UserService {
         params: {
           client_id: process.env.KAKAO_CLIENT_ID,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000/guide.html",
+          redirect_uri: "https://localhost:3000/list",
           grant_type: "authorization_code",
         },
       })
@@ -309,7 +309,7 @@ export class UserService {
         });
         res.status(200).send({ accessToken: response.data.access_token });
       })
-      .catch(err => console.log('kakaoLogin err'));
+      .catch(() => res.status(403).send('No permission'));
     } else {
       res.status(404).send('Not Found Kakao authorizationCode');
     }
@@ -375,6 +375,7 @@ export class UserService {
   }
 
   async editUserinfo(bodyData, res) {
+    if (!bodyData.accessToken) res.status(403).send('No permission');
     if (!(bodyData.userId && bodyData.username && bodyData.profileImage)) {
       return res.status(422).send('required parameters are insufficient')
     }

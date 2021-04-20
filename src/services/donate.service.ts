@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Donate } from 'src/entities/donate.entity';
+import { User } from 'src/entities/user.entity';
 import { Repository } from "typeorm";
 const dateFormat = require("dateformat");
 
@@ -9,7 +10,9 @@ export class DonateService {
 
   constructor(
     @InjectRepository(Donate)
-    private donateRepository: Repository<Donate>
+    private donateRepository: Repository<Donate>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) {}
 
   async postDonate(req, res) {
@@ -20,8 +23,42 @@ export class DonateService {
       const curTime = dateFormat(now, "isoDateTime");
       req.body.createdAt = curTime;
       await this.donateRepository.save(req.body)
+      .then(async () => {
+        res.send("Successfully recorded");
+        const userDonates = await this.donateRepository.find({
+          userId: data.userId
+        })
+        const moneySum = userDonates.reduce((a, c) => {
+          return a + c.money;
+        }, 0);
+        const userInfoDB: User = await this.userRepository.findOne({
+          id: data.userId,
+        })
+        let level = "씨앗";
+        switch (Math.floor(moneySum/100000)) {
+          case 1: 
+            level = "새싹";
+            break;
+          case 2: 
+            level = "어린나무";
+            break;
+          case 3: 
+            level = "큰나무";
+            break;
+          case 4: 
+            level = "꽃";
+            break;
+          case 5: 
+            level = "열매";
+            break;
+          default:
+            level = "씨앗";
+        }
+        userInfoDB.level = level;
+        await this.userRepository.save(userInfoDB);
+      })
       .catch(() => res.status(404).send("Failed"))
-      res.send("Successfully recorded");
+      
     } else {
       res.status(422).send("Required parameters are insufficient")
     }
