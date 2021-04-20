@@ -15,7 +15,7 @@ export class User {
   profileImage: string;
 
   @Column({
-    nullable: true,
+    default: '씨앗'
   })
   level: string;
 
