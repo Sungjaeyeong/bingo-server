@@ -1,42 +1,53 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
-import { Donate } from './donate.entity';
-import { Like } from './like.entity';
-import { NgoCategory } from './ngocategory.entity';
-import { Pocket } from './pocket.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+  JoinColumn,
+} from "typeorm";
+import { Donate } from "./donate.entity";
+import { Love } from "./love.entity";
+import { NgoCategory } from "./ngocategory.entity";
+import { Pocket } from "./pocket.entity";
 
-@Table
-export class Ngo extends Model<Ngo> {
-  
-  @Column
+@Entity()
+export class Ngo {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   name: string;
 
-  @Column
+  @Column()
   link: string;
 
-  @Column
+  @Column()
   logo: string;
 
-  @Column
+  @Column({
+    nullable: true,
+  })
   video: string;
 
-  @Column
-  coverImage: string;
-
-  @Column
+  @Column()
   description: string;
 
-  @Column
+  @Column({
+    nullable: true,
+  })
   since: string;
 
-  @HasMany(() => NgoCategory)
-  ngocategory: NgoCategory[];
+  @OneToMany(type => Pocket, pocket => pocket.ngo)
+  pockets: Pocket[];
 
-  @HasMany(() => Pocket)
-  pocket: Pocket[];
+  @OneToMany(type => Donate, donate => donate.ngo)
+  donates: Donate[];
 
-  @HasMany(() => Donate)
-  donate: Donate[];
+  @OneToMany(type => Love, love => love.ngo)
+  loves: Love[];
 
-  @HasMany(() => Like)
-  like: Like[];
+  @OneToMany(type => NgoCategory, ngocategory => ngocategory.ngo)
+  @JoinColumn()
+  ngocategorys: NgoCategory[];
 }

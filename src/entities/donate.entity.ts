@@ -1,31 +1,40 @@
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from './user.entity';
-import { Ngo } from './ngo.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Ngo } from "./ngo.entity";
+import { User } from "./user.entity";
+@Entity()
+export class Donate {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-@Table
-export class Donate extends Model<Donate> {
-  
-  @Column
+  @Column()
   money: number;
 
-  @Column
+  @Column()
+  createdAt: Date;
+
+  @Column({
+    nullable: true,
+  })
+  updatedAt: Date;
+
+  @Column()
   type: string;
 
-  @Column
+  @Column()
   ing: boolean;
 
-  @ForeignKey(() => User)
-  @Column
+  @Column()
+  message: string;
+
+  @Column()
   userId: number;
 
-  @ForeignKey(() => Ngo)
-  @Column
+  @Column()
   ngoId: number;
 
-  @BelongsTo(() => User)
-  user: User
+  @ManyToOne(type => User, user => user.donates)
+  user: User;
 
-  @BelongsTo(() => Ngo)
-  ngo: Ngo
-
+  @ManyToOne(type => Ngo, ngo => ngo.donates)
+  ngo: Ngo;
 }

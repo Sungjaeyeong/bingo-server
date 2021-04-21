@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { DonateController } from 'src/controllers/donate.controller';
-import { DatabaseModule } from 'src/database/database.module';
-import { donatesProviders } from 'src/providers/donates.providers';
+import { Donate } from 'src/entities/donate.entity';
+import { User } from 'src/entities/user.entity';
 import { DonateService } from 'src/services/donate.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [TypeOrmModule.forFeature([Donate]), TypeOrmModule.forFeature([User])],
   controllers: [DonateController],
   providers: [
     DonateService,
-    ...donatesProviders,
   ],
 })
 export class DonatesModule {}

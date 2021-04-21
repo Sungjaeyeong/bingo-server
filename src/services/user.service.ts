@@ -1,12 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import axios from "axios";
 import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
 import { User } from 'src/entities/user.entity';
+import { getConnection, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('USER_REPOSITORY') private userRepository: typeof User,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   // 카카오 access_token 검사
@@ -20,66 +23,61 @@ export class UserService {
         },
       })
       .then(async (res) => {
-        // console.log(res.data)
-        // const userInfoDB = this.getUserInfo(accessToken);
-        // response.status(200).send({ 
-        //   data: { 
-        //     id: (await userInfoDB).id, 
-        //     username: (await userInfoDB).username, 
-        //     profileImage: (await userInfoDB).profileImage 
-        //   }
-        // })
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('k_accessToken', newAccessToken, {
-            domain: 'ibingo.link',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
           response.status(200).send({ 
             data: { 
-              id: (await userInfoDB).id, 
+              userId: (await userInfoDB).id,
+              accessToken: (await userInfoDB).accessToken, 
               username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
+              profileImage: (await userInfoDB).profileImage,
+              level: (await userInfoDB).level,
+              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId), 
             }
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+        }
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('k_accessToken', newAccessToken, {
-            domain: 'ibingo.link',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
-          response.status(200).send({ 
-            data: { 
-              id: (await userInfoDB).id, 
-              username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
-            }
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
+          this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+          .then(async (newAccessToken) => {
+            response.cookie('k_accessToken', newAccessToken, {
+              domain: 'localhost',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'none'
+            });
+            response.status(200).send({ 
+              data: { 
+                userId: (await userInfoDB).id,
+                accessToken: (await userInfoDB).accessToken, 
+                username: (await userInfoDB).username, 
+                profileImage: (await userInfoDB).profileImage,
+                level: (await userInfoDB).level,
+                ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId) 
+              }
+            })
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+          .catch(async () => {
+            response.send('RefreshToken is expired');
+          })
+        }
       })
     } else {
       response.status(200).send({ 
         data: { 
-          id: null, 
+          userId: null,
+          accessToken: null, 
           username: null,
-          profileImage: null
+          profileImage: null,
+          level: null,
+          ngoIdOfLoveList: null  
         }
       })
     }
@@ -129,56 +127,60 @@ export class UserService {
         // })
         // console.log(res.data)
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('accessToken', newAccessToken, {
-            domain: 'ibingo.link',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
           response.status(200).send({ 
             data: { 
-              id: (await userInfoDB).id, 
+              userId: (await userInfoDB).id,
+              accessToken: (await userInfoDB).accessToken, 
               username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
+              profileImage: (await userInfoDB).profileImage, 
+              level: (await userInfoDB).level,
+              ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
             }
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+        }
       })
       .catch(async () => {
         const userInfoDB = this.getUserInfo(accessToken);
-        this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
-        .then(async (newAccessToken) => {
-          response.cookie('accessToken', newAccessToken, {
-            domain: 'ibingo.link',
-            path: '/',
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-          });
-          response.status(200).send({ 
-            data: { 
-              id: (await userInfoDB).id, 
-              username: (await userInfoDB).username, 
-              profileImage: (await userInfoDB).profileImage 
-            }
+        if (!userInfoDB) {
+          response.status(404).send('Not Found');
+        } else {
+          this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
+          .then(async (newAccessToken) => {
+            response.cookie('accessToken', newAccessToken, {
+              domain: 'localhost',
+              path: '/',
+              httpOnly: true,
+              secure: true,
+              sameSite: 'none'
+            });
+            response.status(200).send({ 
+              data: { 
+                userId: (await userInfoDB).id,
+                accessToken: (await userInfoDB).accessToken, 
+                username: (await userInfoDB).username, 
+                profileImage: (await userInfoDB).profileImage,
+                level: (await userInfoDB).level,
+                ngoIdOfLoveList: (await userInfoDB).loves.map(el => el.ngoId)
+              }
+            })
           })
-        })
-        .catch(async () => {
-          response.send('RefreshToken is expired');
-        })
+          .catch(async () => {
+            response.send('RefreshToken is expired');
+          })
+        }
       })
     } else {
       response.status(200).send({ 
         data: { 
-          id: null, 
+          userId: null,
+          accessToken: null, 
           username: null,
-          profileImage: null
+          profileImage: null,
+          level: null,
+          ngoIdOfLoveList: null
         }
       })
     }
@@ -187,7 +189,10 @@ export class UserService {
   // DB에서 유저정보 가져오기
   async getUserInfo(accessToken: string) {
     const userInfoDB: User = await this.userRepository.findOne({
-      where: { accessToken, }
+      where: {
+        accessToken
+      },
+      relations: ["loves"]
     })
     return userInfoDB;
   }
@@ -212,25 +217,22 @@ export class UserService {
 
   // DB에서 refreshToken 갱신
   async updateRefreshToken(accessToken: string, refreshToken: string, id: number) {
-    await this.userRepository.update({ accessToken, refreshToken }, {
-      where: {
-        id
-      }
-    });
+    const userInfoDB = await this.userRepository.findOne({ id })
+    userInfoDB.accessToken = accessToken;
+    userInfoDB.refreshToken = refreshToken;
+    await this.userRepository.save(userInfoDB);
   }
 
   // DB에서 accessToken 갱신
   async updateAccessToken(accessToken: string, id: number) {
-    await this.userRepository.update({ accessToken }, {
-      where: {
-        id
-      }
-    });
+    const userInfoDB = await this.userRepository.findOne({ id })
+    userInfoDB.accessToken = accessToken;
+    await this.userRepository.save(userInfoDB);
   }
 
   // DB에 유저정보 저장
   async insertUser(username: string, profileImage: string, googleId = null, kakaoId = null, accessToken: string, refreshToken: string) {
-    await this.userRepository.create(<User>({
+    await this.userRepository.save(({
       username,
       profileImage,
       googleId,
@@ -247,7 +249,7 @@ export class UserService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://ibingo.link",
+          redirect_uri: "https://localhost:3000/list",
           grant_type: "authorization_code",
         })
         .then(response => {
@@ -261,7 +263,9 @@ export class UserService {
           });
           res.status(200).send({ accessToken: response.data.access_token });
         })
-        .catch(err => console.log("googleLogin err"));
+        .catch(() => res.status(403).send('No permission'));
+    } else {
+      res.status(404).send('Not Found Google authorizationCode');
     }
   }
 
@@ -276,7 +280,7 @@ export class UserService {
       .then(async (res) => {
         const userInfoGoogle: GoogleUserDto = res.data;
         const userInfoDB: User = await this.userRepository.findOne({
-          where: { googleId: userInfoGoogle.sub, }
+          googleId: userInfoGoogle.sub,
         })
   
         if (!userInfoDB) {
@@ -293,12 +297,13 @@ export class UserService {
   }
 
   async kakaoLogin(bodyData, res) {
+    if (bodyData.authorizationCode) {
     await axios
       .post("https://kauth.kakao.com/oauth/token",{} ,{
         params: {
           client_id: process.env.KAKAO_CLIENT_ID,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://ibingo.link",
+          redirect_uri: "https://localhost:3000/list",
           grant_type: "authorization_code",
         },
       })
@@ -313,7 +318,10 @@ export class UserService {
         });
         res.status(200).send({ accessToken: response.data.access_token });
       })
-      .catch(err => console.log('kakaoLogin err'));
+      .catch(() => res.status(403).send('No permission'));
+    } else {
+      res.status(404).send('Not Found Kakao authorizationCode');
+    }
   }
 
   // 카카오에서 정보 받아오기
@@ -328,7 +336,7 @@ export class UserService {
     .then(async (res) => {
       const userInfoKakao = res.data;
       const userInfoDB: User = await this.userRepository.findOne({
-        where: { kakaoId: userInfoKakao.id, }
+        kakaoId: userInfoKakao.id,
       })
       console.log(userInfoKakao.properties)
       if (!userInfoDB) {
@@ -341,7 +349,6 @@ export class UserService {
   }
 
   async logout(req, res) {
-    console.log('a')
     if (req.cookies.k_accessToken || req.cookies.accessToken) {
       res.clearCookie('k_accessToken', {
         domain: 'ibingo.link',
@@ -375,6 +382,24 @@ export class UserService {
         .catch(err => console.log('kakaoLogout err'));
     }
   }
+
+  async editUserinfo(bodyData, res) {
+    if (!bodyData.accessToken) res.status(403).send('No permission');
+    if (!(bodyData.userId && bodyData.username && bodyData.profileImage)) {
+      return res.status(422).send('required parameters are insufficient')
+    }
+    const { userId, username, profileImage } = bodyData;
+    const userInfoDB: User = await this.userRepository.findOne({
+      id: userId,
+    })
+    if (!userInfoDB) {
+      res.status(404).send('Not Found');
+    } else {
+      userInfoDB.username = username;
+      userInfoDB.profileImage = profileImage;
+      await this.userRepository.save(userInfoDB);
+      res.status(200).send('Successfully updated');
+    }
+    
+  }
 }
-
-

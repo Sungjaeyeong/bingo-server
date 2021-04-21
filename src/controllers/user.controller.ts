@@ -31,7 +31,7 @@ export class UserController {
   }
 
   @Patch('/userinfo')
-  editUserinfo() {
-    
+  editUserinfo(@Body() bodyData, @Res() res) {
+    return this.userService.editUserinfo(bodyData, res);
   }
 }

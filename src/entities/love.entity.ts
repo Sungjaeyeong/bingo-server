@@ -3,15 +3,9 @@ import { Ngo } from './ngo.entity';
 import { User } from './user.entity';
 
 @Entity()
-export class Pocket {
+export class Love {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  type: string;
-
-  @Column()
-  money: string;
 
   @Column()
   userId: number;
@@ -19,9 +13,9 @@ export class Pocket {
   @Column()
   ngoId: number;
 
-  @ManyToOne(type => User, user => user.pockets)
+  @ManyToOne(type => User, user => user.loves)
   user: User;
 
-  @ManyToOne(type => Ngo, ngo => ngo.pockets)
+  @ManyToOne(type => Ngo, ngo => ngo.loves)
   ngo: Ngo;
 }

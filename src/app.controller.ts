@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Req,
-  Res,
-} from "@nestjs/common";
+import { Controller, Get, Headers, Param, Query, Req, Res } from "@nestjs/common";
 import { AppService } from "./app.service";
 
 @Controller()
@@ -19,21 +10,28 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get("/testpage")
-  getTestPage() {}
-
-  @Get("/listpage")
-  getListPage(): string {
-    return "This is listpage info";
+  @Get("/testcookie")
+  getTestCookie(@Req() req): boolean {
+    return this.appService.getTestCookie(req);
   }
 
-  @Get("/contentpage")
-  getContentPage(): string {
-    return "This is contentpage info";
+  @Get("/testpage")
+  getTestPage(@Query("options") options, @Res() res) {
+    return this.appService.getTestPage(options, res);
+  }
+
+  @Get("/listpage")
+  getListPage(@Res() res) {
+    return this.appService.getListPage(res);
+  }
+
+  @Get("/contentpage/:ngo_id")
+  getContentPage(@Param("ngo_id") ngoId: number, @Res() res) {
+    return this.appService.getContentPage(ngoId, res);
   }
 
   @Get("/mypage")
-  getMyPage(): string {
-    return "This is mypage info";
+  getMyPage(@Headers() Headers, @Query("user_id") userId) {
+    return this.appService.getMyPage(Headers, userId);
   }
 }
