@@ -65,7 +65,7 @@ export class AppService {
     const resultIdx = Math.floor(Math.random() * resultList.length);
     const ngoId = resultList[resultIdx][0];
     res.cookie('test', 'yes', {
-      domain: 'localhost',
+      domain: 'ibingo.link',
       path: '/',
       httpOnly: true,
       secure: true,
