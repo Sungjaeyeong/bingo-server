@@ -106,7 +106,8 @@ export class AppService {
       res.status(404).send('Not Found');
     } else {
       const newsList = await this.getNews(ngoInfoDB.name);
-      const message = ngoInfoDB.donates.slice(0, 3);
+      const notNullMessage = ngoInfoDB.donates.filter(el => el.message !== '');
+      const message = notNullMessage.slice(0, 3);
       const messageList = message.map(el => {
         return {...el, user: {
           username: el.user.username,
