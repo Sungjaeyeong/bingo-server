@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from "axios";
 import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
+import { UpdateUserDto } from 'src/dtos/user/update-user.dto';
 import { User } from 'src/entities/user.entity';
 import { getConnection, Repository } from 'typeorm';
 
@@ -47,7 +48,7 @@ export class UserService {
           this.getKakaoAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
           .then(async (newAccessToken) => {
             response.cookie('k_accessToken', newAccessToken, {
-              domain: 'localhost',
+              domain: 'ibingo.link',
               path: '/',
               httpOnly: true,
               secure: true,
@@ -117,6 +118,15 @@ export class UserService {
         }
       },)
       .then(async (res) => {
+        // const userInfoDB = this.getUserInfo(accessToken);
+        // response.status(200).send({ 
+        //   data: { 
+        //     id: (await userInfoDB).id, 
+        //     username: (await userInfoDB).username, 
+        //     profileImage: (await userInfoDB).profileImage 
+        //   }
+        // })
+        // console.log(res.data)
         const userInfoDB = this.getUserInfo(accessToken);
         if (!userInfoDB) {
           response.status(404).send('Not Found');
@@ -141,7 +151,7 @@ export class UserService {
           this.getGoogleAccessToken((await userInfoDB).refreshToken, (await userInfoDB).id)
           .then(async (newAccessToken) => {
             response.cookie('accessToken', newAccessToken, {
-              domain: 'localhost',
+              domain: 'ibingo.link',
               path: '/',
               httpOnly: true,
               secure: true,
@@ -240,13 +250,13 @@ export class UserService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000/list",
+          redirect_uri: "https://ibingo.link/list",
           grant_type: "authorization_code",
         })
         .then(response => {
           this.getGoogleInfo(response.data.access_token, response.data.refresh_token);
           res.cookie('accessToken', response.data.access_token, {
-            domain: 'localhost',
+            domain: 'ibingo.link',
             path: '/',
             httpOnly: true,
             secure: true,
@@ -294,14 +304,14 @@ export class UserService {
         params: {
           client_id: process.env.KAKAO_CLIENT_ID,
           code: bodyData.authorizationCode,
-          redirect_uri: "https://localhost:3000/list",
+          redirect_uri: "https://ibingo.link/list",
           grant_type: "authorization_code",
         },
       })
       .then(response => {
         this.getKakaoInfo(response.data.access_token, response.data.refresh_token);
         res.cookie('k_accessToken', response.data.access_token, {
-          domain: 'localhost',
+          domain: 'ibingo.link',
           path: '/',
           httpOnly: true,
           secure: true,
@@ -336,20 +346,20 @@ export class UserService {
         this.updateRefreshToken(accessToken, refreshToken, userInfoDB.id)
       }
     })
-    .catch(err => console.log('getKakaoInfo err'));
+    .catch(err => console.log(err));
   }
 
   async logout(req, res) {
     if (req.cookies.k_accessToken || req.cookies.accessToken) {
       res.clearCookie('k_accessToken', {
-        domain: 'localhost',
+        domain: 'ibingo.link',
         path: '/',
         httpOnly: true,
         secure: true,
         sameSite: 'none'
       })
       res.clearCookie('accessToken', {
-        domain: 'localhost',
+        domain: 'ibingo.link',
         path: '/',
         httpOnly: true,
         secure: true,
@@ -374,22 +384,24 @@ export class UserService {
     }
   }
 
-  async editUserinfo(bodyData, res) {
-    if (!bodyData.accessToken) res.status(403).send('No permission');
+  async editUserinfo(bodyData: UpdateUserDto) {
+    if (!bodyData.accessToken) {
+      throw new ForbiddenException('No permission');
+    }
     if (!(bodyData.userId && bodyData.username && bodyData.profileImage)) {
-      return res.status(422).send('required parameters are insufficient')
+      throw new UnprocessableEntityException('Required parameters are insufficient');
     }
     const { userId, username, profileImage } = bodyData;
     const userInfoDB: User = await this.userRepository.findOne({
       id: userId,
     })
     if (!userInfoDB) {
-      res.status(404).send('Not Found');
+      throw new NotFoundException('Not found');
     } else {
       userInfoDB.username = username;
       userInfoDB.profileImage = profileImage;
-      await this.userRepository.save(userInfoDB);
-      res.status(200).send('Successfully updated');
+      return await this.userRepository.save(userInfoDB)
+      .then(() => 'Successfully updated')
     }
     
   }
