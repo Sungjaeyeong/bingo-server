@@ -1,5 +1,6 @@
 import { Controller, Get, Patch, Post, Body, Res, Req } from '@nestjs/common';
 import { UserService } from 'src/services/user.service';
+import { UpdateUserDto } from 'src/dtos/user/update-user.dto';
 
 @Controller()
 export class UserController {
@@ -31,7 +32,7 @@ export class UserController {
   }
 
   @Patch('/userinfo')
-  editUserinfo(@Body() bodyData, @Res() res) {
-    return this.userService.editUserinfo(bodyData, res);
+  editUserinfo(@Body() bodyData: UpdateUserDto) {
+    return this.userService.editUserinfo(bodyData);
   }
 }

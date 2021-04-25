@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from "axios";
 import { GoogleUserDto } from 'src/dtos/user/google-user.dto';
+import { UpdateUserDto } from 'src/dtos/user/update-user.dto';
 import { User } from 'src/entities/user.entity';
 import { getConnection, Repository } from 'typeorm';
 
@@ -383,22 +384,24 @@ export class UserService {
     }
   }
 
-  async editUserinfo(bodyData, res) {
-    if (!bodyData.accessToken) res.status(403).send('No permission');
+  async editUserinfo(bodyData: UpdateUserDto) {
+    if (!bodyData.accessToken) {
+      throw new ForbiddenException('No permission');
+    }
     if (!(bodyData.userId && bodyData.username && bodyData.profileImage)) {
-      return res.status(422).send('required parameters are insufficient')
+      throw new UnprocessableEntityException('Required parameters are insufficient');
     }
     const { userId, username, profileImage } = bodyData;
     const userInfoDB: User = await this.userRepository.findOne({
       id: userId,
     })
     if (!userInfoDB) {
-      res.status(404).send('Not Found');
+      throw new NotFoundException('Not found');
     } else {
       userInfoDB.username = username;
       userInfoDB.profileImage = profileImage;
-      await this.userRepository.save(userInfoDB);
-      res.status(200).send('Successfully updated');
+      return await this.userRepository.save(userInfoDB)
+      .then(() => 'Successfully updated')
     }
     
   }

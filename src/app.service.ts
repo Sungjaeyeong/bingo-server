@@ -18,7 +18,7 @@ export class AppService {
     return "Hello World!";
   }
 
-  getTestCookie(req) {
+  getTestCookie(req): boolean {
     if (req.cookies.test) {
       return true;
     } else {
