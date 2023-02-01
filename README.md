@@ -38,8 +38,6 @@ BINGO에서 사회적 가치를 구입하고,
 
 # 🔨 Architecture
 
-### Client-Side Storyboard flow chart
-
 ### Server flow chart
 ![Mind Map](https://user-images.githubusercontent.com/46963394/116099943-6d84ad80-a6e7-11eb-9ae5-4160de69a3a8.jpg)
 
